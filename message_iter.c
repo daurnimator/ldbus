@@ -167,6 +167,7 @@ static int ldbus_message_iter_append_basic ( lua_State *L ) {
 			switch ( argtype ) {
 				case 0:
 					argtype = DBUS_TYPE_DOUBLE; // Lua numbers are doubles by default
+				case DBUS_TYPE_DOUBLE:
 					break;
 				case DBUS_TYPE_BYTE:
 					value.uint8 = (uint8_t)value.dbl;
@@ -190,8 +191,6 @@ static int ldbus_message_iter_append_basic ( lua_State *L ) {
 				case DBUS_TYPE_UINT64:
 					value.uint64 = (uint64_t)value.dbl;
 					break;
-				case DBUS_TYPE_DOUBLE:
-					break;
 				default:
 					return luaL_argerror ( L , 3 , "cannot convert number to given type" );
 			}
@@ -201,8 +200,17 @@ static int ldbus_message_iter_append_basic ( lua_State *L ) {
 			switch ( argtype ) {
 				case 0:
 					argtype = DBUS_TYPE_BOOLEAN;
-					break;
 				case DBUS_TYPE_BOOLEAN:
+				case DBUS_TYPE_BYTE:
+				case DBUS_TYPE_INT16:
+				case DBUS_TYPE_UINT16:
+				case DBUS_TYPE_INT32:
+				case DBUS_TYPE_UINT32:
+				case DBUS_TYPE_INT64:
+				case DBUS_TYPE_UINT64:
+					break;
+				case DBUS_TYPE_DOUBLE:
+					value.dbl = (double)value.uint32;
 					break;
 				default:
 					return luaL_argerror ( L , 3 , "cannot convert boolean to given type" );
@@ -213,7 +221,6 @@ static int ldbus_message_iter_append_basic ( lua_State *L ) {
 			switch ( argtype ) {
 				case 0:
 					argtype = DBUS_TYPE_STRING;
-					break;
 				case DBUS_TYPE_STRING:
 				case DBUS_TYPE_OBJECT_PATH:
 				case DBUS_TYPE_SIGNATURE:
