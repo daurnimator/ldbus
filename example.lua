@@ -1,4 +1,5 @@
 require "ldbus"
+sleep = require"socket".sleep
 
 function sendsignal ( sigvalue )
 	print ( "Sending signal with value " .. sigvalue )
@@ -53,7 +54,7 @@ local function reply_to_method_call ( msg , conn )
 	
 	local reply = assert ( msg:new_method_return ( ) )
 	reply:iter_init_append ( iter )
-	assert ( iter:append_basic ( stat , ldbus.types.uint32 ) , "Out of Memory" )
+	assert ( iter:append_basic ( stat , ldbus.types.boolean ) , "Out of Memory" )
 	assert ( iter:append_basic ( level ) , "Out of Memory" )
 	
 	local ok , serial = assert ( conn:send ( reply ) , "Out of Memory" )
@@ -66,11 +67,10 @@ function listen ( )
 	local conn = assert ( ldbus.bus.get ( "session" ) )
 	assert ( assert ( ldbus.bus.request_name ( conn , "test.method.server" , { replace_existing = true } ) ) == "primary_owner" , "Not Primary Owner" )
 	
-	while true do
-		conn:read_write ( 0 )
+	while conn:read_write ( 0 ) do
 		local msg = conn:pop_message ( )
 		if not msg then
-			os.execute ( "sleep 1" )
+			sleep ( 1 )
 		elseif msg:get_type ( ) == "method_call" then
 			reply_to_method_call ( msg , conn )
 		end
@@ -88,11 +88,10 @@ function receive ( )
 	
 	print ( "Match rule sent" )
 	
-	while true do
-		conn:read_write ( 0 )
+	while conn:read_write ( 0 ) do
 		local msg = conn:pop_message ( )
 		if not msg then
-			os.execute ( "sleep 1" )
+			sleep ( 1 )
 		elseif msg:get_type ( ) == "signal" then
 			local iter = ldbus.message.iter.new ( )
 			assert ( msg:iter_init ( iter ) , "Message has no parameters" )
