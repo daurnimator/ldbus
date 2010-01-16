@@ -49,7 +49,6 @@ static int ldbus_bus_get ( lua_State *L ) {
 	dbus_error_init ( &error );
 	
 	connection = dbus_bus_get ( type , &error );
-	dbus_connection_set_exit_on_disconnect ( connection , FALSE );
 	
 	if ( dbus_error_is_set ( &error ) ) {
 		lua_pushboolean ( L , FALSE );
@@ -57,6 +56,7 @@ static int ldbus_bus_get ( lua_State *L ) {
 		dbus_error_free ( &error );
 		return 2;
 	} else {
+		dbus_connection_set_exit_on_disconnect ( connection , FALSE );
 		push_DBusConnection ( L , connection );
 		return 1;
 	}
