@@ -137,7 +137,9 @@ static int ldbus_message_iter_get_basic ( lua_State *L ) {
 		case DBUS_TYPE_DICT_ENTRY:
 		case DBUS_TYPE_VARIANT:
 		default:
-			return luaL_error ( L , "Encountered non-basic type" );
+			lua_pushnil ( L );
+			lua_pushstring ( L , "Encountered non-basic type" );
+			return 2;
 	}
 	return 1;
 }
