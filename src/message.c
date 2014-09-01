@@ -212,6 +212,7 @@ static int ldbus_message_get_path ( lua_State *L ) {
 }
 
 static int ldbus_message_get_path_decomposed ( lua_State *L ) {
+	int i;
 	DBusMessage * message = *(void **)luaL_checkudata ( L , 1 , "ldbus_DBusMessage" );
 	
 	char ** path;
@@ -221,7 +222,7 @@ static int ldbus_message_get_path_decomposed ( lua_State *L ) {
 		lua_pushnil ( L );
 	} else {
 		lua_newtable ( L );
-		for ( int i = 0 ; path [ i ] != NULL ; ) {
+		for ( i=0 ; path [ i ] != NULL ; ) {
 			lua_pushstring ( L , path [ i ] );
 			lua_rawseti ( L , -2 , ++i );
 		}
