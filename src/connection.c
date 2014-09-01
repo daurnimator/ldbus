@@ -262,9 +262,9 @@ static const DBusObjectPathVTable VTable = {
 static int ldbus_connection_register_object_path(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *path = luaL_checkstring(L, 2);
-	luaL_checktype(L, 3, LUA_TFUNCTION);
 	int ref;
 	State_and_ref *user_data;
+	luaL_checktype(L, 3, LUA_TFUNCTION);
 	lua_settop(L, 3);
 	ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	user_data = lua_newuserdata(L, sizeof(State_and_ref));
