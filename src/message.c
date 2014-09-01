@@ -146,11 +146,17 @@ static int ldbus_message_iter_init ( lua_State *L ) {
 
 static int ldbus_message_iter_init_append ( lua_State *L ) {
 	DBusMessage * message = *(void **)luaL_checkudata ( L , 1 , "ldbus_DBusMessage" );
-	DBusMessageIter * iter = luaL_checkudata ( L , 2 , "ldbus_DBusMessageIter" );
+	DBusMessageIter * iter;
+	if (lua_gettop(L) == 1) {
+		push_DBusMessageIter(L);
+	} else {
+		lua_settop(L, 2);
+	}
+	iter = luaL_checkudata ( L , 2 , "ldbus_DBusMessageIter" );
 	
 	dbus_message_iter_init_append ( message , iter );
 	
-	return 0;
+	return 1;
 }
 
 static int ldbus_message_set_no_reply ( lua_State *L ) {
