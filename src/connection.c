@@ -236,7 +236,7 @@ typedef struct {
 static void unregister_function(DBusConnection *connection, void *user_data) {
 	State_and_ref *data = user_data;
 	luaL_unref(data->L, LUA_REGISTRYINDEX, data->ref);
-	data->ref = LUA_NOREF;
+	free(user_data);
 }
 static DBusHandlerResult message_function(DBusConnection *connection, DBusMessage *message, void *user_data) {
 	State_and_ref *data = user_data;
@@ -265,7 +265,10 @@ static int ldbus_connection_register_object_path(lua_State *L) {
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 	lua_settop(L, 3);
 	ref = luaL_ref(L, LUA_REGISTRYINDEX);
-	user_data = lua_newuserdata(L, sizeof(State_and_ref));
+	user_data = calloc(1, sizeof(State_and_ref));
+	if (user_data == NULL) {
+		return luaL_error(L, LDBUS_NO_MEMORY);
+	}
 	user_data->L = L;
 	user_data->ref = ref;
 	if (!dbus_connection_register_object_path(connection, path, &VTable, user_data)) {
@@ -282,7 +285,10 @@ static int ldbus_connection_register_fallback(lua_State *L) {
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 	lua_settop(L, 3);
 	ref = luaL_ref(L, LUA_REGISTRYINDEX);
-	user_data = lua_newuserdata(L, sizeof(State_and_ref));
+	user_data = calloc(1, sizeof(State_and_ref));
+	if (user_data == NULL) {
+		return luaL_error(L, LDBUS_NO_MEMORY);
+	}
 	user_data->L = L;
 	user_data->ref = ref;
 	if (!dbus_connection_register_fallback(connection, path, &VTable, user_data)) {
