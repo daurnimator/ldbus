@@ -39,12 +39,11 @@ static int ldbus_message_new ( lua_State *L ) {
 	int message_type = dbus_message_type_from_string ( luaL_checkstring ( L , 1 ) );
 	
 	DBusMessage * message = dbus_message_new ( message_type );
-	
 	if ( message == NULL ) {
-		lua_pushboolean ( L , FALSE );
-	} else {
-		push_DBusMessage ( L , message );
+		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
+
+	push_DBusMessage ( L , message );
 	return 1;
 }
 
@@ -55,12 +54,11 @@ static int ldbus_message_new_method_call ( lua_State *L ) {
 	const char * method = luaL_checkstring ( L , 4 );
 	
 	DBusMessage * message = dbus_message_new_method_call ( destination , path , interface , method );
-	
 	if ( message == NULL ) {
-		lua_pushboolean ( L , FALSE );
-	} else {
-		push_DBusMessage ( L , message );
+		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
+
+	push_DBusMessage ( L , message );
 	return 1;
 }
 
@@ -68,12 +66,11 @@ static int ldbus_message_new_method_return ( lua_State *L ) {
 	DBusMessage * methodcall = *(void **)luaL_checkudata ( L , 1 , "ldbus_DBusMessage" );
 	
 	DBusMessage * message = dbus_message_new_method_return ( methodcall );
-	
 	if ( message == NULL ) {
-		lua_pushboolean ( L , FALSE );
-	} else {
-		push_DBusMessage ( L , message );
+		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
+
+	push_DBusMessage ( L , message );
 	return 1;
 }
 
@@ -83,12 +80,11 @@ static int ldbus_message_new_signal ( lua_State *L ) {
 	const char * name = luaL_checkstring ( L , 3 );
 	
 	DBusMessage * message = dbus_message_new_signal ( path , interface , name );
-	
 	if ( message == NULL ) {
-		lua_pushboolean ( L , FALSE );
-	} else {
-		push_DBusMessage ( L , message );
+		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
+
+	push_DBusMessage ( L , message );
 	return 1;
 }
 
@@ -98,12 +94,11 @@ static int ldbus_message_new_error ( lua_State *L ) {
 	const char * error_message = luaL_optstring ( L , 3 , NULL );
 	
 	DBusMessage * message = dbus_message_new_error ( reply_to , name , error_message );
-	
 	if ( message == NULL ) {
-		lua_pushboolean ( L , FALSE );
-	} else {
-		push_DBusMessage ( L , message );
+		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
+
+	push_DBusMessage ( L , message );
 	return 1;
 }
 
@@ -111,12 +106,11 @@ static int ldbus_message_copy ( lua_State *L ) {
 	DBusMessage * orig = *(void **)luaL_checkudata ( L , 1 , "ldbus_DBusMessage" );
 	
 	DBusMessage * message = dbus_message_copy ( orig );
-	
 	if ( message == NULL ) {
-		lua_pushboolean ( L , FALSE );
-	} else {
-		push_DBusMessage ( L , message );
+		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
+
+	push_DBusMessage ( L , message );
 	return 1;
 }
 
