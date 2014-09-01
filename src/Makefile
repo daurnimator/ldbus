@@ -6,7 +6,7 @@ CFLAGS += -fPIC
 
 LIBS = `pkg-config --libs dbus-1`
 
-OBJS = ldbus.o connection.o bus.o message.o message_iter.o
+OBJS = ldbus.o pending_call.o connection.o bus.o message.o message_iter.o
 
 all:	ldbus.so
 

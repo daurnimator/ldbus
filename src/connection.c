@@ -6,6 +6,7 @@
 
 #include "ldbus.h"
 #include "message.h"
+#include "pending_call.h"
 
 #include "connection.h"
 
@@ -90,6 +91,20 @@ static int ldbus_connection_send ( lua_State *L ) {
 	lua_pushinteger ( L , serial );
 	
 	return 2;
+}
+
+static int ldbus_connection_send_with_reply(lua_State *L) {
+    DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+    DBusMessage * message = *(void **)luaL_checkudata(L, 2, "ldbus_DBusMessage");
+    int timeout_milliseconds = luaL_optint(L, 3, -1);
+
+	DBusPendingCall* pending;
+	if (!dbus_connection_send_with_reply(connection, message, &pending, timeout_milliseconds)) {
+		return luaL_error(L, LDBUS_NO_MEMORY);
+	}
+
+	push_DBusPendingCall(L, pending);
+	return 1;
 }
 
 static int ldbus_connection_send_with_reply_and_block ( lua_State *L ) {
@@ -228,6 +243,7 @@ void push_DBusConnection ( lua_State *L , DBusConnection * connection ) {
 			{ "get_is_anonymous" , 			ldbus_connection_get_is_anonymous },
 			{ "get_server_id" , 			ldbus_connection_get_server_id },
 			{ "send" , 				ldbus_connection_send },
+			{ "send_with_reply" , 			ldbus_connection_send_with_reply },
 			{ "send_with_reply_and_block" , 	ldbus_connection_send_with_reply_and_block },
 			{ "flush" ,				ldbus_connection_flush },
 			{ "read_write_dispatch" ,		ldbus_connection_read_write_dispatch},
