@@ -231,6 +231,60 @@ static int ldbus_connection_has_messages_to_send ( lua_State *L ) {
 	return 1;
 }
 
+typedef struct {
+	lua_State *L;
+	int ref;
+} State_and_ref;
+static void unregister_function(DBusConnection *connection, void *user_data) {
+	State_and_ref *data = user_data;
+	luaL_unref(data->L, LUA_REGISTRYINDEX, data->ref);
+	data->ref = LUA_NOREF;
+}
+static DBusHandlerResult message_function(DBusConnection *connection, DBusMessage *message, void *user_data) {
+	State_and_ref *data = user_data;
+	if (!lua_checkstack(data->L, 2)) {
+		return DBUS_HANDLER_RESULT_NEED_MEMORY;
+	}
+	lua_rawgeti(data->L, LUA_REGISTRYINDEX, data->ref);
+	push_DBusMessage(data->L, message);
+	lua_call(data->L, 1, 1);
+	if (lua_toboolean(data->L, -1)) {
+		return DBUS_HANDLER_RESULT_HANDLED;
+	} else {
+		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+	}
+}
+static const DBusObjectPathVTable VTable = {
+	unregister_function,
+	message_function
+};
+
+static int ldbus_connection_register_object_path(lua_State *L) {
+	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	const char *path = luaL_checkstring(L, 2);
+	luaL_checktype(L, 3, LUA_TFUNCTION);
+	int ref;
+	State_and_ref *user_data;
+	lua_settop(L, 3);
+	ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	user_data = lua_newuserdata(L, sizeof(State_and_ref));
+	user_data->L = L;
+	user_data->ref = ref;
+	if (!dbus_connection_register_object_path(connection, path, &VTable, user_data)) {
+		luaL_error(L, "unknown error");
+	}
+	return 0;
+}
+
+static int ldbus_connection_unregister_object_path(lua_State *L) {
+	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	const char *path = luaL_checkstring(L, 2);
+	if (!dbus_connection_unregister_object_path(connection, path)) {
+		luaL_error(L, LDBUS_NO_MEMORY );
+	}
+	return 0;
+}
+
 void push_DBusConnection ( lua_State *L , DBusConnection * connection ) {
 	DBusConnection ** udata = lua_newuserdata ( L , sizeof ( DBusConnection * ) );
 	*udata = connection;
@@ -257,6 +311,8 @@ void push_DBusConnection ( lua_State *L , DBusConnection * connection ) {
 			{ "get_max_received_size" , 		ldbus_connection_get_max_received_size },
 			{ "get_outgoing_size" , 		ldbus_connection_get_outgoing_size },
 			{ "has_messages_to_send" , 		ldbus_connection_has_messages_to_send },
+			{ "register_object_path", 		ldbus_connection_register_object_path },
+			{ "unregister_object_path", 		ldbus_connection_unregister_object_path },
 			{ NULL , NULL }
 		};
 		luaL_register ( L , NULL , methods );
