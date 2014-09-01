@@ -11,9 +11,9 @@
 #include "connection.h"
 
 static const char *const DispatchStatus_lst [] = {
-	"data_remains" , 	//DBUS_DISPATCH_DATA_REMAINS	== 0
-	"complete" ,		//DBUS_DISPATCH_COMPLETE	== 1
-	"need_memory" ,		//DBUS_DISPATCH_NEED_MEMORY	== 2
+	"data_remains" , 	/*DBUS_DISPATCH_DATA_REMAINS	== 0*/
+	"complete" ,		/*DBUS_DISPATCH_COMPLETE	== 1*/
+	"need_memory" ,		/*DBUS_DISPATCH_NEED_MEMORY	== 2*/
 	NULL
 };
 
@@ -111,12 +111,10 @@ static int ldbus_connection_send_with_reply_and_block ( lua_State *L ) {
 	DBusConnection * connection = *(void **)luaL_checkudata ( L , 1 , "ldbus_DBusConnection" );
 	DBusMessage * message = *(void **)luaL_checkudata ( L , 2 , "ldbus_DBusMessage" );
 	int timeout_milliseconds = luaL_optint ( L , 3 , -1 );
-	
+	DBusMessage * reply;
 	DBusError error;
 	dbus_error_init ( &error );
-	
-	DBusMessage * reply = dbus_connection_send_with_reply_and_block ( connection , message , timeout_milliseconds , &error );
-	
+	reply = dbus_connection_send_with_reply_and_block ( connection , message , timeout_milliseconds , &error );
 	if ( dbus_error_is_set ( &error ) ) {
 		lua_pushboolean ( L , FALSE );
 		lua_pushstring ( L , error.message );
@@ -302,37 +300,37 @@ static int ldbus_connection_unregister_object_path(lua_State *L) {
 	return 0;
 }
 
+static luaL_Reg const methods [] = {
+	{ "get_is_connected" , 			ldbus_connection_get_is_connected },
+	{ "get_is_authenticated" , 		ldbus_connection_get_is_authenticated },
+	{ "get_is_anonymous" , 			ldbus_connection_get_is_anonymous },
+	{ "get_server_id" , 			ldbus_connection_get_server_id },
+	{ "send" , 				ldbus_connection_send },
+	{ "send_with_reply" , 			ldbus_connection_send_with_reply },
+	{ "send_with_reply_and_block" , 	ldbus_connection_send_with_reply_and_block },
+	{ "flush" ,				ldbus_connection_flush },
+	{ "read_write_dispatch" ,		ldbus_connection_read_write_dispatch},
+	{ "read_write" , 			ldbus_connection_read_write },
+	{ "pop_message" ,			ldbus_connection_pop_message },
+	{ "get_dispatch_status" , 		ldbus_connection_get_dispatch_status },
+	{ "dispatch" , 				ldbus_connection_dispatch },
+	{ "set_max_message_size" , 		ldbus_connection_set_max_message_size },
+	{ "get_max_message_size" , 		ldbus_connection_get_max_message_size },
+	{ "set_max_received_size" , 		ldbus_connection_set_max_received_size },
+	{ "get_max_received_size" , 		ldbus_connection_get_max_received_size },
+	{ "get_outgoing_size" , 		ldbus_connection_get_outgoing_size },
+	{ "has_messages_to_send" , 		ldbus_connection_has_messages_to_send },
+	{ "register_object_path", 		ldbus_connection_register_object_path },
+	{ "register_fallback", 			ldbus_connection_register_fallback },
+	{ "unregister_object_path", 		ldbus_connection_unregister_object_path },
+	{ NULL , NULL }
+};
 void push_DBusConnection ( lua_State *L , DBusConnection * connection ) {
 	DBusConnection ** udata = lua_newuserdata ( L , sizeof ( DBusConnection * ) );
 	*udata = connection;
 	
 	if ( luaL_newmetatable ( L , "ldbus_DBusConnection" ) ) {
 		lua_newtable ( L );
-		static luaL_Reg const methods [] = {
-			{ "get_is_connected" , 			ldbus_connection_get_is_connected },
-			{ "get_is_authenticated" , 		ldbus_connection_get_is_authenticated },
-			{ "get_is_anonymous" , 			ldbus_connection_get_is_anonymous },
-			{ "get_server_id" , 			ldbus_connection_get_server_id },
-			{ "send" , 				ldbus_connection_send },
-			{ "send_with_reply" , 			ldbus_connection_send_with_reply },
-			{ "send_with_reply_and_block" , 	ldbus_connection_send_with_reply_and_block },
-			{ "flush" ,				ldbus_connection_flush },
-			{ "read_write_dispatch" ,		ldbus_connection_read_write_dispatch},
-			{ "read_write" , 			ldbus_connection_read_write },
-			{ "pop_message" ,			ldbus_connection_pop_message },
-			{ "get_dispatch_status" , 		ldbus_connection_get_dispatch_status },
-			{ "dispatch" , 				ldbus_connection_dispatch },
-			{ "set_max_message_size" , 		ldbus_connection_set_max_message_size },
-			{ "get_max_message_size" , 		ldbus_connection_get_max_message_size },
-			{ "set_max_received_size" , 		ldbus_connection_set_max_received_size },
-			{ "get_max_received_size" , 		ldbus_connection_get_max_received_size },
-			{ "get_outgoing_size" , 		ldbus_connection_get_outgoing_size },
-			{ "has_messages_to_send" , 		ldbus_connection_has_messages_to_send },
-			{ "register_object_path", 		ldbus_connection_register_object_path },
-			{ "register_fallback", 			ldbus_connection_register_fallback },
-			{ "unregister_object_path", 		ldbus_connection_unregister_object_path },
-			{ NULL , NULL }
-		};
 		luaL_register ( L , NULL , methods );
                 lua_setfield ( L , -2 , "__index" );
 		
@@ -348,11 +346,11 @@ void push_DBusConnection ( lua_State *L , DBusConnection * connection ) {
 	lua_setmetatable ( L , -2 );
 }
 
+static const struct luaL_Reg ldbus_connection [] = {
+	{ "open" , ldbus_connection_open },
+	{ NULL , NULL }
+};
 void load_dbus_connection ( lua_State *L ) {
 	lua_newtable ( L );
-	static const struct luaL_Reg ldbus_connection [] = {
-		{ "open" , ldbus_connection_open },
-		{ NULL , NULL }
-	};
 	luaL_register ( L , NULL , ldbus_connection );
 }
