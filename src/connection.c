@@ -276,6 +276,23 @@ static int ldbus_connection_register_object_path(lua_State *L) {
 	return 0;
 }
 
+static int ldbus_connection_register_fallback(lua_State *L) {
+	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	const char *path = luaL_checkstring(L, 2);
+	int ref;
+	State_and_ref *user_data;
+	luaL_checktype(L, 3, LUA_TFUNCTION);
+	lua_settop(L, 3);
+	ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	user_data = lua_newuserdata(L, sizeof(State_and_ref));
+	user_data->L = L;
+	user_data->ref = ref;
+	if (!dbus_connection_register_fallback(connection, path, &VTable, user_data)) {
+		luaL_error(L, "unknown error");
+	}
+	return 0;
+}
+
 static int ldbus_connection_unregister_object_path(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *path = luaL_checkstring(L, 2);
@@ -312,6 +329,7 @@ void push_DBusConnection ( lua_State *L , DBusConnection * connection ) {
 			{ "get_outgoing_size" , 		ldbus_connection_get_outgoing_size },
 			{ "has_messages_to_send" , 		ldbus_connection_has_messages_to_send },
 			{ "register_object_path", 		ldbus_connection_register_object_path },
+			{ "register_fallback", 			ldbus_connection_register_fallback },
 			{ "unregister_object_path", 		ldbus_connection_unregister_object_path },
 			{ NULL , NULL }
 		};
