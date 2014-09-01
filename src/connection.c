@@ -160,7 +160,7 @@ static int ldbus_connection_pop_message ( lua_State *L ) {
 	DBusMessage * message = dbus_connection_pop_message ( connection );
 	
 	if ( message == NULL ) {
-		lua_pushboolean ( L , FALSE );
+		lua_pushnil(L);
 	} else {
 		push_DBusMessage ( L , message );
 	}
