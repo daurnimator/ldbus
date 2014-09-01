@@ -33,7 +33,7 @@ static int ldbus_message_iter_has_next ( lua_State *L ) {
 
 static int ldbus_message_iter_next ( lua_State *L ) {
 	DBusMessageIter * iter = luaL_checkudata ( L , 1 , "ldbus_DBusMessageIter" );
-	
+ 	
 	lua_pushboolean ( L , dbus_message_iter_next ( iter ) );
 	
 	return 1;
@@ -67,11 +67,17 @@ static int ldbus_message_iter_get_element_type ( lua_State *L ) {
 
 static int ldbus_message_iter_recurse ( lua_State *L ) {
 	DBusMessageIter * iter = luaL_checkudata ( L , 1 , "ldbus_DBusMessageIter" );
-	DBusMessageIter * sub = luaL_checkudata ( L , 2 , "ldbus_DBusMessageIter" );
+	DBusMessageIter * sub;
+	if (lua_gettop(L) == 1) {
+		push_DBusMessageIter(L);
+	} else {
+		lua_settop(L, 2);
+	}
+	sub = luaL_checkudata ( L , 2 , "ldbus_DBusMessageIter" );
 	
 	dbus_message_iter_recurse ( iter , sub );
 	
-	return 0;
+	return 1;
 }
 
 static int ldbus_message_iter_get_signature ( lua_State *L ) {
