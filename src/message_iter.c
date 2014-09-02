@@ -43,11 +43,7 @@ static int ldbus_message_iter_get_arg_type ( lua_State *L ) {
 	DBusMessageIter * iter = luaL_checkudata ( L , 1 , "ldbus_DBusMessageIter" );
 	
 	char type = (char)dbus_message_iter_get_arg_type ( iter ); // Convert to char
-	if ( type == DBUS_TYPE_INVALID ) {
-		lua_pushboolean ( L , FALSE );
-	} else {
-		lua_pushlstring ( L , &type , 1 );
-	}
+	lua_pushlstring(L, &type, 1);
 	
 	return 1;
 }
