@@ -244,6 +244,7 @@ static DBusHandlerResult message_function(DBusConnection *connection, DBusMessag
 		return DBUS_HANDLER_RESULT_NEED_MEMORY;
 	}
 	lua_rawgeti(data->L, LUA_REGISTRYINDEX, data->ref);
+	dbus_message_ref(message); /* Keep a reference for lua */
 	push_DBusMessage(data->L, message);
 	lua_call(data->L, 1, 1);
 	if (lua_toboolean(data->L, -1)) {
