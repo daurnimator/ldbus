@@ -2,6 +2,8 @@
 #include <lua.h>
 #include <lauxlib.h>
 
+#include "compat-5.2.h"
+
 #include <dbus/dbus.h>
 
 #include "bus.h"
@@ -160,13 +162,13 @@ int luaopen_ldbus ( lua_State *L ) {
 		lua_setfield ( L , -2 , "UnknownMethod" );
 	lua_setfield ( L , -2 , "errors" );
 	
-	load_dbus_connection ( L );
+	luaL_requiref(L, "ldbus.connection", luaopen_ldbus_connection, 0);
 	lua_setfield ( L , -2 , "connection" );
 	
-	load_dbus_bus ( L );
+	luaL_requiref(L, "ldbus.bus", luaopen_ldbus_bus, 0);
 	lua_setfield ( L , -2 , "bus" );
 	
-	load_dbus_message ( L );
+	luaL_requiref(L, "ldbus.message", luaopen_ldbus_message, 0);
 	lua_setfield ( L , -2 , "message" );
 	
 	return 1;

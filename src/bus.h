@@ -1,3 +1,3 @@
 #include <lua.h>
 
-void load_dbus_bus ( lua_State *L );
+int luaopen_ldbus_bus(lua_State *L);

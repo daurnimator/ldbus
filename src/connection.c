@@ -357,7 +357,8 @@ static const struct luaL_Reg ldbus_connection [] = {
 	{ "open" , ldbus_connection_open },
 	{ NULL , NULL }
 };
-void load_dbus_connection ( lua_State *L ) {
+int luaopen_ldbus_connection (lua_State *L) {
 	lua_newtable ( L );
 	luaL_register ( L , NULL , ldbus_connection );
+	return 1;
 }

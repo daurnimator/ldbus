@@ -240,7 +240,7 @@ static int ldbus_bus_remove_match ( lua_State *L ) {
 	}
 }
 
-void load_dbus_bus ( lua_State *L ) {
+int luaopen_ldbus_bus(lua_State *L) {
 	lua_newtable ( L );
 	static const struct luaL_Reg ldbus_bus [] = {
 		{ "get" , 			ldbus_bus_get },
@@ -256,4 +256,5 @@ void load_dbus_bus ( lua_State *L ) {
 		{ NULL , NULL }
 	};
 	luaL_register ( L , NULL , ldbus_bus );
+	return 1;
 }

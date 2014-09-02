@@ -3,6 +3,7 @@ LUA_LIBDIR = /usr/local/lib/lua/5.1
 CFLAGS += -Wall -Wextra --pedantic --std=c99
 CFLAGS += `pkg-config --cflags lua5.1 dbus-1`
 CFLAGS += -fPIC
+CFLAGS += -I ../vendor/compat-5.2/c-api
 
 LIBS = `pkg-config --libs dbus-1`
 

@@ -406,7 +406,7 @@ void push_DBusMessage ( lua_State *L , DBusMessage * message ) {
 	lua_setmetatable ( L , -2 );
 }
 
-void load_dbus_message ( lua_State *L ) {
+int luaopen_ldbus_message(lua_State *L) {
 	lua_newtable ( L );
 	static const struct luaL_Reg ldbus_message [] = {
 		{ "new" , 		ldbus_message_new },
@@ -418,4 +418,5 @@ void load_dbus_message ( lua_State *L ) {
 	
 	load_dbus_message_iter ( L );
 	lua_setfield ( L , -2 , "iter" );
+	return 1;
 }
