@@ -15,7 +15,7 @@ ldbus.so: $(OBJS)
 	$(CC) -o ldbus.so -shared $(CFLAGS) $^ $(LIBS)
 
 clean:
-	rm ldbus.so $(OBJS)
+	rm -f -- ldbus.so $(OBJS)
 
 install: ldbus.so
 	mkdir -p $(LUA_LIBDIR)
