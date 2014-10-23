@@ -53,7 +53,7 @@ static int ldbus_message_iter_get_element_type(lua_State *L) {
 
 	char type = (char)dbus_message_iter_get_element_type(iter);
 	if (type == DBUS_TYPE_INVALID) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushlstring(L, &type, 1);
 	}

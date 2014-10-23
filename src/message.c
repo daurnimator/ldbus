@@ -203,7 +203,7 @@ static int ldbus_message_get_path(lua_State *L) {
 
 	const char * object_path = dbus_message_get_path(message);
 	if (object_path == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, object_path);
 	}
@@ -246,7 +246,7 @@ static int ldbus_message_get_interface(lua_State *L) {
 
 	const char * interface = dbus_message_get_interface(message);
 	if (interface == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, interface);
 	}
@@ -268,7 +268,7 @@ static int ldbus_message_get_member(lua_State *L) {
 
 	const char * member = dbus_message_get_member(message);
 	if (member == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, member);
 	}
@@ -290,7 +290,7 @@ static int ldbus_message_get_error_name(lua_State *L) {
 
 	const char * error_name = dbus_message_get_error_name(message);
 	if (error_name == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, error_name);
 	}
@@ -312,7 +312,7 @@ static int ldbus_message_get_destination(lua_State *L) {
 
 	const char * destination = dbus_message_get_destination(message);
 	if (destination == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, destination);
 	}
@@ -334,7 +334,7 @@ static int ldbus_message_get_sender(lua_State *L) {
 
 	const char * sender = dbus_message_get_sender(message);
 	if (sender == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, sender);
 	}
@@ -347,7 +347,7 @@ static int ldbus_message_get_signature(lua_State *L) {
 
 	const char * signature = dbus_message_get_signature(message);
 	if (signature == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, signature);
 	}

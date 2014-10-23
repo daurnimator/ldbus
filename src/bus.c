@@ -92,10 +92,10 @@ static int ldbus_bus_set_unique_name(lua_State *L) {
 
 static int ldbus_bus_get_unique_name(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
-	const char *unique_name = dbus_bus_get_unique_name(connection);
 
+	const char *unique_name = dbus_bus_get_unique_name(connection);
 	if (unique_name == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L, FALSE);
 	} else {
 		lua_pushstring(L, unique_name);
 	}
