@@ -12,8 +12,10 @@ Compatible with Lua 5.1 and 5.2 (thanks [compat-5.2](https://github.com/hishamhm
 
 ldbus is on moonrocks: https://rocks.moonscript.org/modules/daurnimator/ldbus
 
-Install via luarocks: `luarocks install --server=http://rocks.moonscript.org/manifests/daurnimator ldbus DBUS_INCDIR=/usr/include/dbus-1.0/ DBUS_ARCH_INCDIR=/usr/lib/dbus-1.0/include`
-You will need to provide paths to `dbus/dbus.h` and `dbus/dbus-arch-deps.h`
+Install via luarocks, you will need to provide paths to `dbus/dbus.h` and `dbus/dbus-arch-deps.h`
+
+    luarocks install --server=http://rocks.moonscript.org/manifests/daurnimator ldbus DBUS_INCDIR=/usr/include/dbus-1.0/ DBUS_ARCH_INCDIR=/usr/lib/dbus-1.0/include
+
 
 # Usage
 
