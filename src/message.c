@@ -10,8 +10,9 @@
 
 #include "message.h"
 
+
 static int ldbus_message_get_serial(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	lua_pushinteger(L, dbus_message_get_serial(message));
 
@@ -19,7 +20,7 @@ static int ldbus_message_get_serial(lua_State *L) {
 }
 
 static int ldbus_message_set_reply_serial(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	dbus_uint32_t reply_serial = luaL_checkint(L, 2);
 
 	lua_pushboolean(L, dbus_message_set_reply_serial(message, reply_serial));
@@ -28,7 +29,7 @@ static int ldbus_message_set_reply_serial(lua_State *L) {
 }
 
 static int ldbus_message_get_reply_serial(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	lua_pushinteger(L, dbus_message_get_reply_serial(message));
 
@@ -63,9 +64,9 @@ static int ldbus_message_new_method_call(lua_State *L) {
 }
 
 static int ldbus_message_new_method_return(lua_State *L) {
-	DBusMessage * methodcall = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *methodcall = check_DBusMessage(L, 1);
 
-	DBusMessage * message = dbus_message_new_method_return(methodcall);
+	DBusMessage *message = dbus_message_new_method_return(methodcall);
 	if (message == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
@@ -89,9 +90,9 @@ static int ldbus_message_new_signal(lua_State *L) {
 }
 
 static int ldbus_message_new_error(lua_State *L) {
-	DBusMessage * reply_to = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
-	const char * name = luaL_checkstring(L, 2);
-	const char * error_message = luaL_optstring(L, 3, NULL);
+	DBusMessage *reply_to = check_DBusMessage(L, 1);
+	const char *name = luaL_checkstring(L, 2);
+	const char *error_message = luaL_optstring(L, 3, NULL);
 
 	DBusMessage * message = dbus_message_new_error(reply_to, name, error_message);
 	if (message == NULL) {
@@ -103,9 +104,9 @@ static int ldbus_message_new_error(lua_State *L) {
 }
 
 static int ldbus_message_copy(lua_State *L) {
-	DBusMessage * orig = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *orig = check_DBusMessage(L, 1);
 
-	DBusMessage * message = dbus_message_copy(orig);
+	DBusMessage *message = dbus_message_copy(orig);
 	if (message == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
@@ -115,7 +116,7 @@ static int ldbus_message_copy(lua_State *L) {
 }
 
 static int ldbus_message_unref(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	dbus_message_unref(message);
 
@@ -123,14 +124,14 @@ static int ldbus_message_unref(lua_State *L) {
 }
 
 static int ldbus_message_get_type(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	lua_pushstring(L, dbus_message_type_to_string(dbus_message_get_type(message)));
 	return 1;
 }
 
 static int ldbus_message_iter_init(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	DBusMessageIter * iter = luaL_checkudata(L, 2, "ldbus_DBusMessageIter");
 
 	lua_pushboolean(L, dbus_message_iter_init(message, iter));
@@ -139,7 +140,8 @@ static int ldbus_message_iter_init(lua_State *L) {
 }
 
 static int ldbus_message_iter_init_append(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
+
 	DBusMessageIter * iter;
 	if (lua_gettop(L) == 1) {
 		push_DBusMessageIter(L);
@@ -154,7 +156,7 @@ static int ldbus_message_iter_init_append(lua_State *L) {
 }
 
 static int ldbus_message_set_no_reply(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	int no_reply = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
 
 	dbus_message_set_no_reply(message, no_reply);
@@ -163,7 +165,7 @@ static int ldbus_message_set_no_reply(lua_State *L) {
 }
 
 static int ldbus_message_get_no_reply(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	lua_pushboolean(L, dbus_message_get_no_reply(message));
 
@@ -171,7 +173,7 @@ static int ldbus_message_get_no_reply(lua_State *L) {
 }
 
 static int ldbus_message_set_auto_start(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	int auto_start = (luaL_checktype(L, 2, LUA_TBOOLEAN), lua_toboolean(L, 2));
 
 	dbus_message_set_auto_start(message, auto_start);
@@ -180,7 +182,7 @@ static int ldbus_message_set_auto_start(lua_State *L) {
 }
 
 static int ldbus_message_get_auto_start(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	lua_pushboolean(L, dbus_message_get_auto_start(message));
 
@@ -188,7 +190,7 @@ static int ldbus_message_get_auto_start(lua_State *L) {
 }
 
 static int ldbus_message_set_path(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	const char * object_path = luaL_optstring(L, 2, NULL);
 
 	lua_pushboolean(L, dbus_message_set_path(message, object_path));
@@ -197,7 +199,7 @@ static int ldbus_message_set_path(lua_State *L) {
 }
 
 static int ldbus_message_get_path(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	const char * object_path = dbus_message_get_path(message);
 	if (object_path == NULL) {
@@ -211,7 +213,7 @@ static int ldbus_message_get_path(lua_State *L) {
 
 static int ldbus_message_get_path_decomposed(lua_State *L) {
 	int i;
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	char ** path;
 	if (dbus_message_get_path_decomposed(message, &path) == FALSE) {
@@ -231,7 +233,7 @@ static int ldbus_message_get_path_decomposed(lua_State *L) {
 }
 
 static int ldbus_message_set_interface(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	const char * interface = luaL_optstring(L, 2, NULL);
 
 	lua_pushboolean(L, dbus_message_set_interface(message, interface));
@@ -240,7 +242,7 @@ static int ldbus_message_set_interface(lua_State *L) {
 }
 
 static int ldbus_message_get_interface(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	const char * interface = dbus_message_get_interface(message);
 	if (interface == NULL) {
@@ -253,7 +255,7 @@ static int ldbus_message_get_interface(lua_State *L) {
 }
 
 static int ldbus_message_set_member(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	const char * member = luaL_optstring(L, 2, NULL);
 
 	lua_pushboolean(L, dbus_message_set_member(message, member));
@@ -262,7 +264,7 @@ static int ldbus_message_set_member(lua_State *L) {
 }
 
 static int ldbus_message_get_member(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	const char * member = dbus_message_get_member(message);
 	if (member == NULL) {
@@ -275,7 +277,7 @@ static int ldbus_message_get_member(lua_State *L) {
 }
 
 static int ldbus_message_set_error_name(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	const char * error_name = luaL_optstring(L, 2, NULL);
 
 	lua_pushboolean(L, dbus_message_set_error_name(message, error_name));
@@ -284,7 +286,7 @@ static int ldbus_message_set_error_name(lua_State *L) {
 }
 
 static int ldbus_message_get_error_name(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	const char * error_name = dbus_message_get_error_name(message);
 	if (error_name == NULL) {
@@ -297,7 +299,7 @@ static int ldbus_message_get_error_name(lua_State *L) {
 }
 
 static int ldbus_message_set_destination(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	const char * destination = luaL_optstring(L, 2, NULL);
 
 	lua_pushboolean(L, dbus_message_set_destination(message, destination));
@@ -306,7 +308,7 @@ static int ldbus_message_set_destination(lua_State *L) {
 }
 
 static int ldbus_message_get_destination(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	const char * destination = dbus_message_get_destination(message);
 	if (destination == NULL) {
@@ -319,7 +321,7 @@ static int ldbus_message_get_destination(lua_State *L) {
 }
 
 static int ldbus_message_set_sender(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 	const char * sender = luaL_optstring(L, 2, NULL);
 
 	lua_pushboolean(L, dbus_message_set_sender(message, sender));
@@ -328,7 +330,7 @@ static int ldbus_message_set_sender(lua_State *L) {
 }
 
 static int ldbus_message_get_sender(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	const char * sender = dbus_message_get_sender(message);
 	if (sender == NULL) {
@@ -341,7 +343,7 @@ static int ldbus_message_get_sender(lua_State *L) {
 }
 
 static int ldbus_message_get_signature(lua_State *L) {
-	DBusMessage * message = *(void **)luaL_checkudata(L, 1, "ldbus_DBusMessage");
+	DBusMessage *message = check_DBusMessage(L, 1);
 
 	const char * signature = dbus_message_get_signature(message);
 	if (signature == NULL) {
@@ -388,7 +390,7 @@ void push_DBusMessage(lua_State *L, DBusMessage * message) {
 	DBusMessage ** udata = lua_newuserdata(L, sizeof(DBusMessage *));
 	*udata = message;
 
-	if (luaL_newmetatable(L, "ldbus_DBusMessage")) {
+	if (luaL_newmetatable(L, DBUS_MESSAGE_METATABLE)) {
 		lua_newtable(L);
 		luaL_register(L, NULL, methods);
 		lua_setfield(L, -2, "__index");

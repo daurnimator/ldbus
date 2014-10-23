@@ -8,6 +8,7 @@
 #include "message.h"
 #include "pending_call.h"
 
+#include "error.h"
 #include "connection.h"
 
 static const char *const DispatchStatus_lst [] = {
@@ -20,16 +21,12 @@ static const char *const DispatchStatus_lst [] = {
 static int ldbus_connection_open(lua_State *L) {
 	const char * address = luaL_checkstring(L, 1);
 
-	DBusConnection * connection;
-	DBusError error;
-	dbus_error_init(&error);
+	DBusError *error = new_DBusError(L);
+	DBusConnection *connection = dbus_connection_open(address, error);
 
-	connection = dbus_connection_open(address, &error);
-
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		push_DBusConnection(L, connection);
@@ -38,7 +35,12 @@ static int ldbus_connection_open(lua_State *L) {
 }
 
 static int ldbus_connection_unref(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
+
+	/* You must close a connection prior to releasing the last reference to the connection.
+	   If you dbus_connection_unref() for the last time without closing the connection,
+	   the results are undefined */
+	dbus_connection_close(connection);
 
 	dbus_connection_unref(connection);
 
@@ -46,7 +48,7 @@ static int ldbus_connection_unref(lua_State *L) {
 }
 
 static int ldbus_connection_get_is_connected(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushboolean(L, dbus_connection_get_is_connected(connection));
 
@@ -54,7 +56,7 @@ static int ldbus_connection_get_is_connected(lua_State *L) {
 }
 
 static int ldbus_connection_get_is_authenticated(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushboolean(L, dbus_connection_get_is_authenticated(connection));
 
@@ -62,7 +64,7 @@ static int ldbus_connection_get_is_authenticated(lua_State *L) {
 }
 
 static int ldbus_connection_get_is_anonymous(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushboolean(L, dbus_connection_get_is_anonymous(connection));
 
@@ -70,23 +72,23 @@ static int ldbus_connection_get_is_anonymous(lua_State *L) {
 }
 
 static int ldbus_connection_get_server_id(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	char * result = dbus_connection_get_server_id(connection);
 	if (result == NULL) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, result);
 	}
+
 	return 1;
 }
 
 static int ldbus_connection_send(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
-	DBusMessage * message = *(void **)luaL_checkudata(L, 2, "ldbus_DBusMessage");
+	DBusConnection *connection = check_DBusConnection(L, 1);
+	DBusMessage *message = check_DBusMessage(L, 2);
 
 	unsigned int serial;
-
 	lua_pushboolean(L, dbus_connection_send(connection, message, &serial));
 	lua_pushinteger(L, serial);
 
@@ -94,8 +96,8 @@ static int ldbus_connection_send(lua_State *L) {
 }
 
 static int ldbus_connection_send_with_reply(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
-	DBusMessage * message = *(void **)luaL_checkudata(L, 2, "ldbus_DBusMessage");
+	DBusConnection *connection = check_DBusConnection(L, 1);
+	DBusMessage *message = check_DBusMessage(L, 2);
 	int timeout_milliseconds = luaL_optint(L, 3, -1);
 
 	DBusPendingCall* pending;
@@ -108,8 +110,8 @@ static int ldbus_connection_send_with_reply(lua_State *L) {
 }
 
 static int ldbus_connection_send_with_reply_and_block(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
-	DBusMessage * message = *(void **)luaL_checkudata(L, 2, "ldbus_DBusMessage");
+	DBusConnection *connection = check_DBusConnection(L, 1);
+	DBusMessage *message = check_DBusMessage(L, 2);
 	int timeout_milliseconds = luaL_optint(L, 3, -1);
 	DBusMessage * reply;
 	DBusError error;
@@ -127,7 +129,7 @@ static int ldbus_connection_send_with_reply_and_block(lua_State *L) {
 }
 
 static int ldbus_connection_flush(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	dbus_connection_flush(connection);
 
@@ -135,7 +137,7 @@ static int ldbus_connection_flush(lua_State *L) {
 }
 
 static int ldbus_connection_read_write_dispatch(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	int timeout_milliseconds = luaL_optint(L, 2, -1);
 
 	lua_pushboolean(L, dbus_connection_read_write_dispatch(connection, timeout_milliseconds));
@@ -144,7 +146,7 @@ static int ldbus_connection_read_write_dispatch(lua_State *L) {
 }
 
 static int ldbus_connection_read_write(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	int timeout_milliseconds = luaL_optint(L, 2, -1);
 
 	lua_pushboolean(L, dbus_connection_read_write(connection, timeout_milliseconds));
@@ -153,7 +155,7 @@ static int ldbus_connection_read_write(lua_State *L) {
 }
 
 static int ldbus_connection_pop_message(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	DBusMessage * message = dbus_connection_pop_message(connection);
 
@@ -166,21 +168,21 @@ static int ldbus_connection_pop_message(lua_State *L) {
 }
 
 static int ldbus_connection_get_dispatch_status(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushstring(L, DispatchStatus_lst [ dbus_connection_get_dispatch_status(connection) ]);
 	return 1;
 }
 
 static int ldbus_connection_dispatch(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushstring(L, DispatchStatus_lst [ dbus_connection_dispatch(connection) ]);
 	return 1;
 }
 
 static int ldbus_connection_set_max_message_size(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	long size = luaL_checklong(L, 2);
 
 	dbus_connection_set_max_message_size(connection, size);
@@ -189,7 +191,7 @@ static int ldbus_connection_set_max_message_size(lua_State *L) {
 }
 
 static int ldbus_connection_get_max_message_size(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushinteger(L, dbus_connection_get_max_message_size(connection));
 
@@ -197,7 +199,7 @@ static int ldbus_connection_get_max_message_size(lua_State *L) {
 }
 
 static int ldbus_connection_set_max_received_size(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	long size = luaL_checklong(L, 2);
 
 	dbus_connection_set_max_received_size(connection, size);
@@ -206,7 +208,7 @@ static int ldbus_connection_set_max_received_size(lua_State *L) {
 }
 
 static int ldbus_connection_get_max_received_size(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushinteger(L, dbus_connection_get_max_received_size(connection));
 
@@ -214,7 +216,7 @@ static int ldbus_connection_get_max_received_size(lua_State *L) {
 }
 
 static int ldbus_connection_get_outgoing_size(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushinteger(L, dbus_connection_get_outgoing_size(connection));
 
@@ -222,7 +224,7 @@ static int ldbus_connection_get_outgoing_size(lua_State *L) {
 }
 
 static int ldbus_connection_has_messages_to_send(lua_State *L) {
-	DBusConnection * connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	lua_pushboolean(L, dbus_connection_has_messages_to_send(connection));
 
@@ -262,7 +264,7 @@ static const DBusObjectPathVTable VTable = {
 };
 
 static int ldbus_connection_register_object_path(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
 	int ref;
 	State_and_ref *user_data;
@@ -282,7 +284,7 @@ static int ldbus_connection_register_object_path(lua_State *L) {
 }
 
 static int ldbus_connection_register_fallback(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
 	int ref;
 	State_and_ref *user_data;
@@ -302,7 +304,7 @@ static int ldbus_connection_register_fallback(lua_State *L) {
 }
 
 static int ldbus_connection_unregister_object_path(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
 	if (!dbus_connection_unregister_object_path(connection, path)) {
 		luaL_error(L, LDBUS_NO_MEMORY);
@@ -339,7 +341,7 @@ void push_DBusConnection(lua_State *L, DBusConnection * connection) {
 	DBusConnection ** udata = lua_newuserdata(L, sizeof(DBusConnection *));
 	*udata = connection;
 
-	if (luaL_newmetatable(L, "ldbus_DBusConnection")) {
+	if (luaL_newmetatable(L, DBUS_CONNECTION_METATABLE)) {
 		lua_newtable(L);
 		luaL_register(L, NULL, methods);
 		lua_setfield(L, -2, "__index");
