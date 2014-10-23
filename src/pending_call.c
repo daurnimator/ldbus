@@ -47,19 +47,20 @@ static int ldbus_pending_call_block(lua_State *L) {
 	return 0;
 }
 
-void push_DBusPendingCall(lua_State *L, DBusPendingCall* pending){
+void push_DBusPendingCall(lua_State *L, DBusPendingCall* pending) {
+	static luaL_Reg const methods [] = {
+		{ "cancel",        ldbus_pending_call_cancel },
+		{ "get_completed", ldbus_pending_call_get_completed },
+		{ "steal_reply",   ldbus_pending_call_steal_reply },
+		{ "block",         ldbus_pending_call_block },
+		{ NULL, NULL }
+	};
+
 	DBusPendingCall ** udata = lua_newuserdata(L, sizeof(DBusPendingCall*));
 	*udata = pending;
 
 	if (luaL_newmetatable(L, "ldbus_DBusPendingCall")) {
-		lua_newtable ( L );
-		static luaL_Reg const methods [] = {
-			{ "cancel",        ldbus_pending_call_cancel },
-			{ "get_completed", ldbus_pending_call_get_completed },
-			{ "steal_reply",   ldbus_pending_call_steal_reply },
-			{ "block",         ldbus_pending_call_block },
-			{ NULL, NULL }
-		};
+		lua_newtable(L);
 		luaL_register(L, NULL, methods);
 		lua_setfield(L, -2, "__index");
 
