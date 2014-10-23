@@ -60,7 +60,7 @@ static int ldbus_bus_get(lua_State *L) {
 }
 
 static int ldbus_bus_register(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	DBusError *error = new_DBusError(L);
 	dbus_bus_register(connection, error);
@@ -76,7 +76,7 @@ static int ldbus_bus_register(lua_State *L) {
 }
 
 static int ldbus_bus_set_unique_name(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *unique_name = luaL_checkstring(L, 2);
 
 	lua_pushboolean(L, dbus_bus_set_unique_name(connection, unique_name));
@@ -85,7 +85,7 @@ static int ldbus_bus_set_unique_name(lua_State *L) {
 }
 
 static int ldbus_bus_get_unique_name(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 
 	const char *unique_name = dbus_bus_get_unique_name(connection);
 	if (unique_name == NULL) {
@@ -98,7 +98,7 @@ static int ldbus_bus_get_unique_name(lua_State *L) {
 }
 
 static int ldbus_bus_request_name(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *name = luaL_checkstring(L, 2);
 	unsigned int flags = 0;
 	DBusError *error;
@@ -134,7 +134,7 @@ static int ldbus_bus_request_name(lua_State *L) {
 }
 
 static int ldbus_bus_release_name(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *name = luaL_checkstring(L, 2);
 	int result;
 
@@ -152,7 +152,7 @@ static int ldbus_bus_release_name(lua_State *L) {
 }
 
 static int ldbus_bus_name_has_owner(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *name = luaL_checkstring(L, 2);
 	int result;
 
@@ -170,7 +170,7 @@ static int ldbus_bus_name_has_owner(lua_State *L) {
 }
 
 static int ldbus_bus_start_service_by_name(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *name = luaL_checkstring(L, 2);
 	unsigned int result;
 
@@ -188,7 +188,7 @@ static int ldbus_bus_start_service_by_name(lua_State *L) {
 }
 
 static int ldbus_bus_add_match(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *rule = luaL_checkstring(L, 2);
 
 	DBusError *error = new_DBusError(L);
@@ -205,7 +205,7 @@ static int ldbus_bus_add_match(lua_State *L) {
 }
 
 static int ldbus_bus_remove_match(lua_State *L) {
-	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
+	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *rule = luaL_checkstring(L, 2);
 
 	DBusError *error = new_DBusError(L);
