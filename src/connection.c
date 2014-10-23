@@ -257,7 +257,8 @@ static DBusHandlerResult message_function(DBusConnection *connection, DBusMessag
 }
 static const DBusObjectPathVTable VTable = {
 	unregister_function,
-	message_function
+	message_function,
+	NULL, NULL, NULL, NULL
 };
 
 static int ldbus_connection_register_object_path(lua_State *L) {

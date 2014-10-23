@@ -73,4 +73,4 @@ void push_DBusPendingCall(lua_State *L, DBusPendingCall* pending){
 		lua_setfield(L, -2, "__udtype");
 	}
 	lua_setmetatable(L, -2);
-};
+}
