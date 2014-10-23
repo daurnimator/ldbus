@@ -234,11 +234,13 @@ typedef struct {
 	int ref;
 } State_and_ref;
 static void unregister_function(DBusConnection *connection, void *user_data) {
+	UNUSED(connection);
 	State_and_ref *data = user_data;
 	luaL_unref(data->L, LUA_REGISTRYINDEX, data->ref);
 	free(user_data);
 }
 static DBusHandlerResult message_function(DBusConnection *connection, DBusMessage *message, void *user_data) {
+	UNUSED(connection);
 	State_and_ref *data = user_data;
 	if (!lua_checkstack(data->L, 2)) {
 		return DBUS_HANDLER_RESULT_NEED_MEMORY;
