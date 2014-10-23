@@ -21,6 +21,7 @@ build = {
 		ldbus = {
 			sources = {
 				"src/ldbus.c",
+				"src/error.c",
 				"src/bus.c",
 				"src/connection.c",
 				"src/message.c",
