@@ -7,6 +7,7 @@
 #include "ldbus.h"
 #include "connection.h"
 #include "message.h"
+#include "error.h"
 
 #include "bus.h"
 
@@ -44,16 +45,12 @@ static const char *const Start_Reply_lst [] = {
 static int ldbus_bus_get(lua_State *L) {
 	int type = luaL_checkoption(L, 1, NULL, BusType_lst);
 
-	DBusConnection *connection;
-	DBusError error;
-	dbus_error_init(&error);
+	DBusError *error = new_DBusError(L);
+	DBusConnection *connection = dbus_bus_get(type, error);
 
-	connection = dbus_bus_get(type, &error);
-
-	if (dbus_error_is_set(&error)) {
+	if (dbus_error_is_set(error)) {
 		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		dbus_connection_set_exit_on_disconnect(connection, FALSE);
@@ -65,15 +62,12 @@ static int ldbus_bus_get(lua_State *L) {
 static int ldbus_bus_register(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 
-	DBusError error;
-	dbus_error_init(&error);
+	DBusError *error = new_DBusError(L);
+	dbus_bus_register(connection, error);
 
-	dbus_bus_register(connection, &error);
-
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		lua_pushboolean(L, TRUE);
@@ -95,7 +89,7 @@ static int ldbus_bus_get_unique_name(lua_State *L) {
 
 	const char *unique_name = dbus_bus_get_unique_name(connection);
 	if (unique_name == NULL) {
-		lua_pushnil(L, FALSE);
+		lua_pushnil(L);
 	} else {
 		lua_pushstring(L, unique_name);
 	}
@@ -107,7 +101,7 @@ static int ldbus_bus_request_name(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *name = luaL_checkstring(L, 2);
 	unsigned int flags = 0;
-	DBusError error;
+	DBusError *error;
 	int result;
 
 	switch (lua_type(L, 3)) {
@@ -127,12 +121,11 @@ static int ldbus_bus_request_name(lua_State *L) {
 			break;
 	}
 
-	dbus_error_init(&error);
-	result = dbus_bus_request_name(connection, name, flags, &error);
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	error = new_DBusError(L);
+	result = dbus_bus_request_name(connection, name, flags, error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		lua_pushstring(L, Request_Name_Reply_lst [ result ]);
@@ -144,15 +137,13 @@ static int ldbus_bus_release_name(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *name = luaL_checkstring(L, 2);
 	int result;
-	DBusError error;
-	dbus_error_init(&error);
 
-	result = dbus_bus_release_name(connection, name, &error);
+	DBusError *error = new_DBusError(L);
+	result = dbus_bus_release_name(connection, name, error);
 
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		lua_pushstring(L, Release_Name_Reply_lst [ result ]);
@@ -164,15 +155,13 @@ static int ldbus_bus_name_has_owner(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *name = luaL_checkstring(L, 2);
 	int result;
-	DBusError error;
-	dbus_error_init(&error);
 
-	result = dbus_bus_name_has_owner(connection, name, &error);
+	DBusError *error = new_DBusError(L);
+	result = dbus_bus_name_has_owner(connection, name, error);
 
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		lua_pushboolean(L, result);
@@ -184,15 +173,13 @@ static int ldbus_bus_start_service_by_name(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *name = luaL_checkstring(L, 2);
 	unsigned int result;
-	DBusError error;
-	dbus_error_init(&error);
 
-	dbus_bus_start_service_by_name(connection, name, 0, &result, &error);
+	DBusError *error = new_DBusError(L);
+	dbus_bus_start_service_by_name(connection, name, 0, &result, error);
 
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		lua_pushstring(L, Start_Reply_lst [ result ]);
@@ -204,15 +191,12 @@ static int ldbus_bus_add_match(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *rule = luaL_checkstring(L, 2);
 
-	DBusError error;
-	dbus_error_init(&error);
+	DBusError *error = new_DBusError(L);
+	dbus_bus_add_match(connection, rule, error);
 
-	dbus_bus_add_match(connection, rule, &error);
-
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		lua_pushboolean(L, TRUE);
@@ -224,15 +208,12 @@ static int ldbus_bus_remove_match(lua_State *L) {
 	DBusConnection *connection = *(void **)luaL_checkudata(L, 1, "ldbus_DBusConnection");
 	const char *rule = luaL_checkstring(L, 2);
 
-	DBusError error;
-	dbus_error_init(&error);
+	DBusError *error = new_DBusError(L);
+	dbus_bus_remove_match(connection, rule, error);
 
-	dbus_bus_remove_match(connection, rule, &error);
-
-	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
-		lua_pushstring(L, error.message);
-		dbus_error_free(&error);
+	if (dbus_error_is_set(error)) {
+		lua_pushnil(L);
+		lua_pushstring(L, error->message);
 		return 2;
 	} else {
 		lua_pushboolean(L, TRUE);
