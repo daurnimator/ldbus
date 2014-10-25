@@ -12,16 +12,7 @@
 
 #define check_DBusWatch(L, arg) (*(DBusWatch **)luaL_checkudata((L), (arg), DBUS_WATCH_METATABLE))
 
-typedef struct {
-    lua_State* L;
-    int ref;
-} ldbus_watch_udata;
-
-enum DBus_lua_func_indexes {
-    DBUS_LUA_FUNC_ADD,
-    DBUS_LUA_FUNC_REMOVE,
-    DBUS_LUA_FUNC_TOGGLE
-};
+typedef ldbus_callback_udata ldbus_watch_udata;
 
 LDBUS_INTERNAL void push_DBusWatch(lua_State *L, DBusWatch *watch);
 LDBUS_INTERNAL dbus_bool_t ldbus_watch_add_function(DBusWatch *watch, void *data);
