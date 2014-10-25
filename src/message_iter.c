@@ -253,14 +253,24 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 
 static int ldbus_message_iter_open_container(lua_State *L) {
 	DBusMessageIter *iter = luaL_checkudata(L, 1, "ldbus_DBusMessageIter");
-	DBusMessageIter *sub = luaL_checkudata(L, 2, "ldbus_DBusMessageIter");
-	size_t l;
-	int argtype = (int) luaL_checklstring(L, 3, &l) [ 0 ];
+	int argtype;
 	const char *contained_signature;
-	if (l != 1) return luaL_argerror(L, 3, lua_pushfstring(L, "character expected, got %s", luaL_typename(L, 3)));
-	contained_signature = luaL_optstring(L, 4, NULL);
+	DBusMessageIter *sub;
+	if (lua_type(L, 2) != LUA_TSTRING || lua_rawlen(L, 2) != 1) {
+		return luaL_argerror(L, 2, lua_pushfstring(L, "character expected, got %s", luaL_typename(L, 2)));
+	}
+	argtype = lua_tostring(L, 2)[0];
+	contained_signature = luaL_optstring(L, 3, NULL);
+	if (lua_gettop(L) < 4) {
+		push_DBusMessageIter(L);
+	} else {
+		lua_settop(L, 4);
+	}
+	sub = luaL_checkudata(L, 4, "ldbus_DBusMessageIter");
 
-	lua_pushboolean(L, dbus_message_iter_open_container(iter, argtype, contained_signature, sub));
+	if (!dbus_message_iter_open_container(iter, argtype, contained_signature, sub)) {
+		return luaL_error(L, LDBUS_NO_MEMORY);
+	}
 
 	return 1;
 }
