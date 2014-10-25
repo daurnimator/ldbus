@@ -108,6 +108,9 @@ example.lua is a lua version of [Matthew Johnson's example](http://dbus.freedesk
 [`dbus_pending_call_get_completed()`](http://dbus.freedesktop.org/doc/api/html/group__DBusPendingCall.html#gacbf33ae8a1cc125628f9ea44d175c159)             | `completed = my_pending_call:get_completed()                            |
 [`dbus_pending_call_steal_reply()`](http://dbus.freedesktop.org/doc/api/html/group__DBusPendingCall.html#ga5a738928c2369fef093ce00658903d06)               | `message = my_pending_call:steal_reply()                                |
 [`dbus_pending_call_block()`](http://dbus.freedesktop.org/doc/api/html/group__DBusPendingCall.html#ga67b99f749a7f477c7b5d70f2acee5452)                     | `my_pending_call:block()`                                               |
+[`dbus_timeout_get_interval()`](http://dbus.freedesktop.org/doc/api/html/group__DBusTimeout.html#ga67ba21b6189438875c6007ee79da5e37)                       | `secs = my_timeout:get_interval()`                                      | Returned number is in seconds (rather than milliseconds)
+[`dbus_timeout_handle()`](http://dbus.freedesktop.org/doc/api/html/group__DBusTimeout.html#ga038b67c8d3db2624a1e4a8bc45f25d12)                             | `ok = my_timeout:handle()`                                              |
+[`dbus_timeout_get_enabled()`](http://dbus.freedesktop.org/doc/api/html/group__DBusTimeout.html#ga58954b2edb45ec1632529d35525ea45c)                        | `enabled = my_timeout:get_enabled()`                                    |
 
 
 ### Other
