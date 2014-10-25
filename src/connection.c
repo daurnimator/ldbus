@@ -252,6 +252,37 @@ static int ldbus_connection_set_timeout_functions(lua_State *L) {
 	return 1;
 }
 
+static void dispatch_status_function(DBusConnection *connection, DBusDispatchStatus new_status, void *data) {
+	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int ref = ((ldbus_callback_udata*)data)->ref;
+	UNUSED(connection);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_pushstring(L, DispatchStatus_lst[new_status]);
+	lua_pcall(L, 1, 0, 0);
+}
+
+static void free_data_function(void *data) {
+	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int ref = ((ldbus_callback_udata*)data)->ref;
+	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	free(data);
+}
+
+static int ldbus_connection_set_dispatch_status_function(lua_State *L) {
+	DBusConnection *connection = check_DBusConnection(L, 1);
+	ldbus_callback_udata *data;
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+	lua_settop(L, 2);
+	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
+		return luaL_error(L, LDBUS_NO_MEMORY);
+	}
+	data->L = L;
+	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	dbus_connection_set_dispatch_status_function(connection, dispatch_status_function, data, free_data_function);
+	lua_pushboolean(L, 1);
+	return 1;
+}
+
 static int ldbus_connection_set_max_message_size(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	long size = luaL_checklong(L, 2);
@@ -404,6 +435,7 @@ static luaL_Reg const methods [] = {
 	{ "dispatch",                  ldbus_connection_dispatch },
 	{ "set_watch_functions",       ldbus_connection_set_watch_functions },
 	{ "set_timeout_functions",     ldbus_connection_set_timeout_functions },
+	{ "set_dispatch_status_function", ldbus_connection_set_dispatch_status_function },
 	{ "set_max_message_size",      ldbus_connection_set_max_message_size },
 	{ "get_max_message_size",      ldbus_connection_get_max_message_size },
 	{ "set_max_received_size",     ldbus_connection_set_max_received_size },
