@@ -54,7 +54,7 @@ static int ldbus_bus_get(lua_State *L) {
 		return 2;
 	} else {
 		dbus_connection_set_exit_on_disconnect(connection, FALSE);
-		push_DBusConnection(L, connection);
+		push_DBusConnection(L, connection, FALSE);
 		return 1;
 	}
 }

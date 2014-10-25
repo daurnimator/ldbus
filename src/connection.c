@@ -1,4 +1,6 @@
 #include <stdlib.h>
+#include <stdbool.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 
@@ -29,20 +31,23 @@ static int ldbus_connection_open(lua_State *L) {
 		lua_pushstring(L, error->message);
 		return 2;
 	} else {
-		push_DBusConnection(L, connection);
+		push_DBusConnection(L, connection, FALSE);
 		return 1;
 	}
 }
 
-static int ldbus_connection_unref(lua_State *L) {
-	DBusConnection *connection = check_DBusConnection(L, 1);
+static int ldbus_connection_gc(lua_State *L) {
+	lDBusConnection *udata = check_lDBusConnection(L, 1);
 
-	/* You must close a connection prior to releasing the last reference to the connection.
-	   If you dbus_connection_unref() for the last time without closing the connection,
-	   the results are undefined */
-	dbus_connection_close(connection);
+	if (udata->close) {
+		/* You must close a connection prior to releasing the last reference to the connection.
+		   If you dbus_connection_unref() for the last time without closing the connection,
+		   the results are undefined
+		*/
+		dbus_connection_close(udata->connection);
+	}
 
-	dbus_connection_unref(connection);
+	dbus_connection_unref(udata->connection);
 
 	return 0;
 }
@@ -337,15 +342,17 @@ static luaL_Reg const methods [] = {
 	{ "unregister_object_path",    ldbus_connection_unregister_object_path },
 	{ NULL, NULL }
 };
-void push_DBusConnection(lua_State *L, DBusConnection * connection) {
-	DBusConnection ** udata = lua_newuserdata(L, sizeof(DBusConnection *));
-	*udata = connection;
+
+void push_DBusConnection(lua_State *L, DBusConnection * connection, bool close) {
+	lDBusConnection *udata = lua_newuserdata(L, sizeof(lDBusConnection));
+	udata->connection = connection;
+	udata->close = close;
 
 	if (luaL_newmetatable(L, DBUS_CONNECTION_METATABLE)) {
 		luaL_newlib(L, methods);
 		lua_setfield(L, -2, "__index");
 
-		lua_pushcfunction(L, ldbus_connection_unref) ;
+		lua_pushcfunction(L, ldbus_connection_gc) ;
 		lua_setfield(L, -2, "__gc");
 
 		lua_pushcfunction(L, tostring);
