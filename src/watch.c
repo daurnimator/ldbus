@@ -58,29 +58,9 @@ static int ldbus_watch_get_enabled(lua_State *L) {
 }
 
 LDBUS_INTERNAL void push_DBusWatch(lua_State *L, DBusWatch *watch) {
-	static luaL_Reg const methods [] = {
-		{ "get_unix_fd", ldbus_watch_get_unix_fd },
-		{ "get_socket", ldbus_watch_get_socket },
-		{ "get_flags", ldbus_watch_get_flags },
-		{ "handle", ldbus_watch_handle },
-		{ "get_enabled", ldbus_watch_get_enabled },
-		{ NULL, NULL }
-	};
-
 	DBusWatch **udata = lua_newuserdata(L, sizeof(DBusWatch*));
 	*udata = watch;
-
-	if (luaL_newmetatable(L, DBUS_WATCH_METATABLE)) {
-		luaL_newlib(L, methods);
-		lua_setfield(L, -2, "__index");
-
-		lua_pushcfunction(L, tostring);
-		lua_setfield(L, -2, "__tostring");
-
-		lua_pushstring(L, "DBusWatch");
-		lua_setfield(L, -2, "__udtype");
-	}
-	lua_setmetatable(L, -2);
+	luaL_setmetatable(L, DBUS_WATCH_METATABLE);
 }
 
 LDBUS_INTERNAL dbus_bool_t ldbus_watch_add_function(DBusWatch *watch, void *data) {
@@ -161,4 +141,27 @@ LDBUS_INTERNAL void ldbus_watch_free_data_function(void *data) {
 
 	luaL_unref(L, LUA_REGISTRYINDEX, ref);
 	free(data);
+}
+
+int lua_open_ldbus_watch(lua_State *L) {
+	static luaL_Reg const methods [] = {
+		{ "get_unix_fd", ldbus_watch_get_unix_fd },
+		{ "get_socket", ldbus_watch_get_socket },
+		{ "get_flags", ldbus_watch_get_flags },
+		{ "handle", ldbus_watch_handle },
+		{ "get_enabled", ldbus_watch_get_enabled },
+		{ NULL, NULL }
+	};
+
+	if (luaL_newmetatable(L, DBUS_WATCH_METATABLE)) {
+		luaL_newlib(L, methods);
+		lua_setfield(L, -2, "__index");
+
+		lua_pushcfunction(L, tostring);
+		lua_setfield(L, -2, "__tostring");
+
+		lua_pushstring(L, "DBusWatch");
+		lua_setfield(L, -2, "__udtype");
+	}
+	return 0;
 }
