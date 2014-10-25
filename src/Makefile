@@ -7,7 +7,7 @@ CFLAGS += -I ../vendor/compat-5.2/c-api
 
 LIBS = `pkg-config --libs dbus-1`
 
-OBJS = ldbus.o error.o pending_call.o connection.o bus.o message.o message_iter.o watch.o
+OBJS = ldbus.o error.o pending_call.o connection.o bus.o message.o message_iter.o timeout.o watch.o
 
 all:	ldbus.so
 
