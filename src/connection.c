@@ -192,6 +192,7 @@ static int ldbus_connection_set_watch_functions(lua_State *L) {
 	ldbus_watch_udata *data;
 
 	DBusConnection *connection = check_DBusConnection(L, 1);
+	int has_toggle = lua_isnil(L, 4);
 	lua_settop(L, 4);
 	/* Place a table below the 3 callback argument */
 	lua_createtable(L, 0, 3);
@@ -210,7 +211,8 @@ static int ldbus_connection_set_watch_functions(lua_State *L) {
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	if (!dbus_connection_set_watch_functions(connection,
-			ldbus_watch_add_function, ldbus_watch_remove_function, ldbus_watch_toggled_function,
+			ldbus_watch_add_function, ldbus_watch_remove_function,
+			has_toggle ? NULL : ldbus_watch_toggled_function,
 			(void *)data, ldbus_watch_free_data_function)) {
 		free(data);
 		return luaL_error(L, LDBUS_NO_MEMORY);
