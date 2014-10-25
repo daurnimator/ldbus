@@ -1,3 +1,6 @@
+#ifndef LDBUS_CONNECTION_H
+#define LDBUS_CONNECTION_H
+
 #include <stdbool.h>
 
 #include <lua.h>
@@ -26,3 +29,5 @@ typedef struct {
 LDBUS_INTERNAL void push_DBusConnection(lua_State *L, DBusConnection *connection, bool close);
 
 int luaopen_ldbus_connection(lua_State *L);
+
+#endif

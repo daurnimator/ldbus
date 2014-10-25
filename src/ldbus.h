@@ -1,3 +1,6 @@
+#ifndef LDBUS_H
+#define LDBUS_H
+
 #include <lua.h>
 
 #define UNUSED(x) (void)(x)
@@ -7,3 +10,5 @@
 LDBUS_INTERNAL int tostring(lua_State *);
 
 int luaopen_ldbus(lua_State *);
+
+#endif
