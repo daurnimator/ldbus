@@ -117,7 +117,7 @@ static int ldbus_bus_request_name(lua_State *L) {
 			if (lua_toboolean(L, -1)) flags |= DBUS_NAME_FLAG_REPLACE_EXISTING;
 			break;
 		default:
-			return luaL_typerror(L, 3, "table or nil");
+			return luaL_argerror(L, 3, lua_pushfstring(L, "table or nil expected, got %s", luaL_typename(L, 3)));
 			break;
 	}
 

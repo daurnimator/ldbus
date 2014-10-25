@@ -162,7 +162,7 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 			break;
 		default:
 			argtype = (int) luaL_checklstring(L, 3, &l) [ 0 ];
-			if (l != 1) return luaL_typerror(L, 3, "character or nil");
+			if (l != 1) return luaL_argerror(L, 3, lua_pushfstring(L, "character or nil expected, got %s", luaL_typename(L, 3)));
 			break;
 	}
 
@@ -241,7 +241,7 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 		case LUA_TTHREAD:
 		case LUA_TLIGHTUSERDATA:
 		default:
-			return luaL_typerror(L, 3, "number, boolean or string");
+			return luaL_argerror(L, 3, lua_pushfstring(L, "number, boolean or string expected, got %s", luaL_typename(L, 3)));
 	}
 
 	lua_pushboolean(L, dbus_message_iter_append_basic(iter, argtype, &value));
@@ -255,7 +255,7 @@ static int ldbus_message_iter_open_container(lua_State *L) {
 	size_t l;
 	int argtype = (int) luaL_checklstring(L, 3, &l) [ 0 ];
 	const char *contained_signature;
-	if (l != 1) return luaL_typerror(L, 3, "character");
+	if (l != 1) return luaL_argerror(L, 3, lua_pushfstring(L, "character expected, got %s", luaL_typename(L, 3)));
 	contained_signature = luaL_optstring(L, 4, NULL);
 
 	lua_pushboolean(L, dbus_message_iter_open_container(iter, argtype, contained_signature, sub));
