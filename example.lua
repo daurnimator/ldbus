@@ -1,4 +1,4 @@
-require "ldbus"
+local ldbus = require "ldbus"
 sleep = require"socket".sleep
 
 function sendsignal ( sigvalue )
