@@ -48,7 +48,7 @@ static int ldbus_pending_call_block(lua_State *L) {
 	return 0;
 }
 
-void push_DBusPendingCall(lua_State *L, DBusPendingCall* pending) {
+LDBUS_INTERNAL void push_DBusPendingCall(lua_State *L, DBusPendingCall* pending) {
 	static luaL_Reg const methods [] = {
 		{ "cancel",        ldbus_pending_call_cancel },
 		{ "get_completed", ldbus_pending_call_get_completed },

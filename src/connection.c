@@ -344,7 +344,7 @@ static luaL_Reg const methods [] = {
 	{ NULL, NULL }
 };
 
-void push_DBusConnection(lua_State *L, DBusConnection * connection, bool close) {
+LDBUS_INTERNAL void push_DBusConnection(lua_State *L, DBusConnection * connection, bool close) {
 	lDBusConnection *udata = lua_newuserdata(L, sizeof(lDBusConnection));
 	udata->connection = connection;
 	udata->close = close;

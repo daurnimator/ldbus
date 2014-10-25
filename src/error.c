@@ -3,6 +3,7 @@
 
 #include <dbus/dbus.h>
 
+#include "ldbus.h"
 #include "error.h"
 
 static int ldbus_error_free(lua_State *L) {
@@ -12,7 +13,7 @@ static int ldbus_error_free(lua_State *L) {
 }
 
 /* Creates a new DBusError, and pushes it onto the lua stack */
-DBusError* new_DBusError(lua_State *L) {
+LDBUS_INTERNAL DBusError* new_DBusError(lua_State *L) {
 	DBusError *res = lua_newuserdata(L, sizeof(DBusError));
 	if (luaL_newmetatable(L, DBUS_ERROR_METATABLE)) {
 		lua_newtable(L);

@@ -357,7 +357,7 @@ static int ldbus_message_get_signature(lua_State *L) {
 	return 1;
 }
 
-void push_DBusMessage(lua_State *L, DBusMessage * message) {
+LDBUS_INTERNAL void push_DBusMessage(lua_State *L, DBusMessage * message) {
 	static luaL_Reg const methods [] = {
 		{ "get_serial",          ldbus_message_get_serial },
 		{ "set_reply_serial",    ldbus_message_set_reply_serial },

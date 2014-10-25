@@ -274,7 +274,7 @@ static int ldbus_message_iter_close_container(lua_State *L) {
 	return 1;
 }
 
-int push_DBusMessageIter(lua_State *L) {
+LDBUS_INTERNAL int push_DBusMessageIter(lua_State *L) {
 	static luaL_Reg const methods [] = {
 		{ "has_next",         ldbus_message_iter_has_next },
 		{ "next",             ldbus_message_iter_next },
@@ -306,7 +306,7 @@ int push_DBusMessageIter(lua_State *L) {
 	return 1;
 }
 
-void load_dbus_message_iter(lua_State *L) {
+LDBUS_INTERNAL void load_dbus_message_iter(lua_State *L) {
 	static const struct luaL_Reg ldbus_message_iter [] = {
 		{ "new", push_DBusMessageIter },
 		{ NULL, NULL }
