@@ -6,4 +6,4 @@
 
 LDBUS_INTERNAL int tostring(lua_State *);
 
-int luaopen_curses(lua_State *);
+int luaopen_ldbus(lua_State *);
