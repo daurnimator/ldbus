@@ -302,32 +302,38 @@ static int ldbus_connection_has_messages_to_send(lua_State *L) {
 	return 1;
 }
 
-typedef struct {
-	lua_State *L;
-	int ref;
-} State_and_ref;
-static void unregister_function(DBusConnection *connection, void *user_data) {
-	State_and_ref *data = user_data;
+static void unregister_function(DBusConnection *connection, void *data) {
+	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int ref = ((ldbus_callback_udata*)data)->ref;
 	UNUSED(connection);
-	luaL_unref(data->L, LUA_REGISTRYINDEX, data->ref);
-	free(user_data);
+	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	free(data);
 }
-static DBusHandlerResult message_function(DBusConnection *connection, DBusMessage *message, void *user_data) {
-	State_and_ref *data = user_data;
+
+static DBusHandlerResult message_function(DBusConnection *connection, DBusMessage *message, void *data) {
+	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int ref = ((ldbus_callback_udata*)data)->ref;
 	UNUSED(connection);
-	if (!lua_checkstack(data->L, 2)) {
+	if (!lua_checkstack(L, 2)) {
 		return DBUS_HANDLER_RESULT_NEED_MEMORY;
 	}
-	lua_rawgeti(data->L, LUA_REGISTRYINDEX, data->ref);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
 	dbus_message_ref(message); /* Keep a reference for lua */
-	push_DBusMessage(data->L, message);
-	lua_call(data->L, 1, 1);
-	if (lua_toboolean(data->L, -1)) {
-		return DBUS_HANDLER_RESULT_HANDLED;
-	} else {
-		return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+	push_DBusMessage(L, message);
+	switch(lua_pcall(L, 1, 1, 0)) {
+		case LUA_OK:
+			if (lua_toboolean(L, -1)) {
+				return DBUS_HANDLER_RESULT_HANDLED;
+			} else {
+				return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
+			}
+		case LUA_ERRMEM:
+			return DBUS_HANDLER_RESULT_NEED_MEMORY;
+		default:
+			return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 	}
 }
+
 static const DBusObjectPathVTable VTable = {
 	unregister_function,
 	message_function,
@@ -337,50 +343,49 @@ static const DBusObjectPathVTable VTable = {
 static int ldbus_connection_register_object_path(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
-	int ref;
-	State_and_ref *user_data;
+	ldbus_callback_udata *data;
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 	lua_settop(L, 3);
-	ref = luaL_ref(L, LUA_REGISTRYINDEX);
-	user_data = calloc(1, sizeof(State_and_ref));
-	if (user_data == NULL) {
+	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
-	user_data->L = L;
-	user_data->ref = ref;
-	if (!dbus_connection_register_object_path(connection, path, &VTable, user_data)) {
-		luaL_error(L, "unknown error");
+	data->L = L;
+	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	if (!dbus_connection_register_object_path(connection, path, &VTable, data)) {
+		free(data);
+		return luaL_error(L, "unknown error");
 	}
-	return 0;
+	lua_pushboolean(L, 1);
+	return 1;
 }
 
 static int ldbus_connection_register_fallback(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
-	int ref;
-	State_and_ref *user_data;
+	ldbus_callback_udata *data;
 	luaL_checktype(L, 3, LUA_TFUNCTION);
 	lua_settop(L, 3);
-	ref = luaL_ref(L, LUA_REGISTRYINDEX);
-	user_data = calloc(1, sizeof(State_and_ref));
-	if (user_data == NULL) {
+	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
-	user_data->L = L;
-	user_data->ref = ref;
-	if (!dbus_connection_register_fallback(connection, path, &VTable, user_data)) {
-		luaL_error(L, "unknown error");
+	data->L = L;
+	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	if (!dbus_connection_register_fallback(connection, path, &VTable, data)) {
+		free(data);
+		return luaL_error(L, "unknown error");
 	}
-	return 0;
+	lua_pushboolean(L, 1);
+	return 1;
 }
 
 static int ldbus_connection_unregister_object_path(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
 	if (!dbus_connection_unregister_object_path(connection, path)) {
-		luaL_error(L, LDBUS_NO_MEMORY);
+		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
-	return 0;
+	lua_pushboolean(L, 1);
+	return 1;
 }
 
 static luaL_Reg const methods [] = {
