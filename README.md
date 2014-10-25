@@ -24,7 +24,8 @@ example.lua is a lua version of [Matthew Johnson's example](http://dbus.freedesk
 
 ### Bound from C
 
-Functions that normally take a `DBusError` return `nil, "error_message"` on failure.
+  - Functions that normally take a `DBusError` return `nil, "error_message"` on failure.
+  - Errors will be thrown on out of memory
 
  C                                                                                                                                                         | Lua                                               | Comments
 -----------------------------------------------------------------------------------------------------------------------------------------------------------|---------------------------------------------------|--------------------------
@@ -94,3 +95,12 @@ Functions that normally take a `DBusError` return `nil, "error_message"` on fail
 [`dbus_message_set_sender()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#gaa2170744c2c19217d9df02551f16bc92)                         | `my_message:set_sender()`                         |
 [`dbus_message_get_sender()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#ga13ce514ceb2d1598751f3a7760cf1375)                         | `my_message:get_sender()`                         |
 [`dbus_message_get_signature()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#gaed63e4c2baaa50d782e8ebb7643def19)                      | `my_message:get_signature()`                      |
+
+
+### Other
+
+#### `my_iter = ldbus.message.iter.new()`
+
+Creates a new `DBusMessageIter` object
+
+
