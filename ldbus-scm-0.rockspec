@@ -27,6 +27,7 @@ build = {
 				"src/message.c",
 				"src/message_iter.c",
 				"src/pending_call.c",
+				"src/watch.c",
 				"vendor/compat-5.2/c-api/compat-5.2.c"
 			},
 			libraries = { "dbus-1" },

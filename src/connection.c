@@ -10,7 +10,7 @@
 #include "ldbus.h"
 #include "message.h"
 #include "pending_call.h"
-
+#include "watch.h"
 #include "error.h"
 #include "connection.h"
 
@@ -187,6 +187,30 @@ static int ldbus_connection_dispatch(lua_State *L) {
 	return 1;
 }
 
+static int ldbus_connection_set_watch_functions(lua_State *L) {
+	ldbus_watch_udata *data;
+
+	DBusConnection *connection = check_DBusConnection(L, 1);
+	lua_settop(L, 4);
+	/* Place a table below the 3 callback argument */
+	lua_createtable(L, 0, 3);
+	lua_insert(L, 2);
+	/* Insert in reverse order */
+	lua_rawseti(L, 2, DBUS_LUA_FUNC_TOGGLE);
+	lua_rawseti(L, 2, DBUS_LUA_FUNC_REMOVE);
+	lua_rawseti(L, 2, DBUS_LUA_FUNC_ADD);
+
+	if ((data = malloc(sizeof(ldbus_watch_udata))) == NULL) return luaL_error(L, LDBUS_NO_MEMORY);
+	data->L = L;
+	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+
+	if (!dbus_connection_set_watch_functions(connection, ldbus_watch_add_function, ldbus_watch_remove_function, ldbus_watch_toggled_function, (void *)data, ldbus_watch_free_data_function)) {
+		 return luaL_error(L, LDBUS_NO_MEMORY);
+	};
+	lua_pushboolean(L, TRUE);
+	return 1;
+}
+
 static int ldbus_connection_set_max_message_size(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	long size = luaL_checklong(L, 2);
@@ -332,6 +356,7 @@ static luaL_Reg const methods [] = {
 	{ "pop_message",               ldbus_connection_pop_message },
 	{ "get_dispatch_status",       ldbus_connection_get_dispatch_status },
 	{ "dispatch",                  ldbus_connection_dispatch },
+	{ "set_watch_functions",       ldbus_connection_set_watch_functions },
 	{ "set_max_message_size",      ldbus_connection_set_max_message_size },
 	{ "get_max_message_size",      ldbus_connection_get_max_message_size },
 	{ "set_max_received_size",     ldbus_connection_set_max_received_size },
