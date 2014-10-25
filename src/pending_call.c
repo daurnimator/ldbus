@@ -60,8 +60,7 @@ void push_DBusPendingCall(lua_State *L, DBusPendingCall* pending) {
 	*udata = pending;
 
 	if (luaL_newmetatable(L, "ldbus_DBusPendingCall")) {
-		lua_newtable(L);
-		luaL_register(L, NULL, methods);
+		luaL_newlib(L, methods);
 		lua_setfield(L, -2, "__index");
 
 		lua_pushcfunction(L, ldbus_pending_call_unref);

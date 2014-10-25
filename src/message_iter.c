@@ -290,8 +290,7 @@ int push_DBusMessageIter(lua_State *L) {
 	lua_newuserdata(L, sizeof(DBusMessageIter));
 
 	if (luaL_newmetatable(L, "ldbus_DBusMessageIter")) {
-		lua_newtable(L);
-		luaL_register(L, NULL, methods);
+		luaL_newlib(L, methods);
 		lua_setfield(L, -2, "__index");
 
 		lua_pushcfunction(L, tostring);
@@ -310,6 +309,5 @@ void load_dbus_message_iter(lua_State *L) {
 		{ "new", push_DBusMessageIter },
 		{ NULL, NULL }
 	};
-	lua_newtable(L);
-	luaL_register(L, NULL, ldbus_message_iter);
+	luaL_newlib(L, ldbus_message_iter);
 }

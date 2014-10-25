@@ -235,7 +235,6 @@ int luaopen_ldbus_bus(lua_State *L) {
 		{ "remove_match",          ldbus_bus_remove_match },
 		{ NULL, NULL }
 	};
-	lua_newtable(L);
-	luaL_register(L, NULL, ldbus_bus);
+	luaL_newlib(L, ldbus_bus);
 	return 1;
 }

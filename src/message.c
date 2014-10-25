@@ -391,8 +391,7 @@ void push_DBusMessage(lua_State *L, DBusMessage * message) {
 	*udata = message;
 
 	if (luaL_newmetatable(L, DBUS_MESSAGE_METATABLE)) {
-		lua_newtable(L);
-		luaL_register(L, NULL, methods);
+		luaL_newlib(L, methods);
 		lua_setfield(L, -2, "__index");
 
 		lua_pushcfunction(L, ldbus_message_unref) ;
@@ -414,8 +413,7 @@ int luaopen_ldbus_message(lua_State *L) {
 		{ "new_signal",      ldbus_message_new_signal },
 		{ NULL, NULL }
 	};
-	lua_newtable(L);
-	luaL_register(L, NULL, ldbus_message);
+	luaL_newlib(L, ldbus_message);
 
 	load_dbus_message_iter(L);
 	lua_setfield(L, -2, "iter");

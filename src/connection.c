@@ -342,8 +342,7 @@ void push_DBusConnection(lua_State *L, DBusConnection * connection) {
 	*udata = connection;
 
 	if (luaL_newmetatable(L, DBUS_CONNECTION_METATABLE)) {
-		lua_newtable(L);
-		luaL_register(L, NULL, methods);
+		luaL_newlib(L, methods);
 		lua_setfield(L, -2, "__index");
 
 		lua_pushcfunction(L, ldbus_connection_unref) ;
@@ -363,7 +362,6 @@ static const struct luaL_Reg ldbus_connection [] = {
 	{ NULL, NULL }
 };
 int luaopen_ldbus_connection(lua_State *L) {
-	lua_newtable(L);
-	luaL_register(L, NULL, ldbus_connection);
+	luaL_newlib(L, ldbus_connection);
 	return 1;
 }

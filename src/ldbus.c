@@ -35,7 +35,7 @@ int luaopen_ldbus(lua_State *L) {
 		{ "get_version", ldbus_get_version },
 		{ NULL, NULL }
 	};
-	luaL_register(L, "ldbus", ldbus);
+	luaL_newlib(L, ldbus);
 
 	/* Type Constants: */
 	lua_newtable(L);
