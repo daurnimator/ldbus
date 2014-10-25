@@ -22,7 +22,7 @@ static const char *const DispatchStatus_lst [] = {
 };
 
 static int ldbus_connection_open(lua_State *L) {
-	const char * address = luaL_checkstring(L, 1);
+	const char *address = luaL_checkstring(L, 1);
 
 	DBusError *error = new_DBusError(L);
 	DBusConnection *connection = dbus_connection_open(address, error);
@@ -80,7 +80,7 @@ static int ldbus_connection_get_is_anonymous(lua_State *L) {
 static int ldbus_connection_get_server_id(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 
-	char * result = dbus_connection_get_server_id(connection);
+	char *result = dbus_connection_get_server_id(connection);
 	if (result == NULL) {
 		lua_pushnil(L);
 	} else {
@@ -106,7 +106,7 @@ static int ldbus_connection_send_with_reply(lua_State *L) {
 	DBusMessage *message = check_DBusMessage(L, 2);
 	int timeout_milliseconds = luaL_optint(L, 3, -1);
 
-	DBusPendingCall* pending;
+	DBusPendingCall *pending;
 	if (!dbus_connection_send_with_reply(connection, message, &pending, timeout_milliseconds)) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
@@ -119,7 +119,7 @@ static int ldbus_connection_send_with_reply_and_block(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	DBusMessage *message = check_DBusMessage(L, 2);
 	int timeout_milliseconds = luaL_optint(L, 3, -1);
-	DBusMessage * reply;
+	DBusMessage *reply;
 	DBusError error;
 	dbus_error_init(&error);
 	reply = dbus_connection_send_with_reply_and_block(connection, message, timeout_milliseconds, &error);
@@ -163,7 +163,7 @@ static int ldbus_connection_read_write(lua_State *L) {
 static int ldbus_connection_pop_message(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 
-	DBusMessage * message = dbus_connection_pop_message(connection);
+	DBusMessage *message = dbus_connection_pop_message(connection);
 
 	if (message == NULL) {
 		lua_pushnil(L);
@@ -208,7 +208,9 @@ static int ldbus_connection_set_watch_functions(lua_State *L) {
 	data->L = L;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
-	if (!dbus_connection_set_watch_functions(connection, ldbus_watch_add_function, ldbus_watch_remove_function, ldbus_watch_toggled_function, (void *)data, ldbus_watch_free_data_function)) {
+	if (!dbus_connection_set_watch_functions(connection,
+			ldbus_watch_add_function, ldbus_watch_remove_function, ldbus_watch_toggled_function,
+			(void *)data, ldbus_watch_free_data_function)) {
 		free(data);
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	};
@@ -374,7 +376,7 @@ static luaL_Reg const methods [] = {
 	{ NULL, NULL }
 };
 
-LDBUS_INTERNAL void push_DBusConnection(lua_State *L, DBusConnection * connection, bool close) {
+LDBUS_INTERNAL void push_DBusConnection(lua_State *L, DBusConnection *connection, bool close) {
 	lDBusConnection *udata = lua_newuserdata(L, sizeof(lDBusConnection));
 	udata->connection = connection;
 	udata->close = close;
