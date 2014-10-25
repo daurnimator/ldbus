@@ -104,6 +104,10 @@ example.lua is a lua version of [Matthew Johnson's example](http://dbus.freedesk
 [`dbus_message_iter_append_basic()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#ga17491f3b75b3203f6fc47dcc2e3b221b)                  | `my_message_iter:append_basic(object [, type])`                         |
 [`dbus_message_iter_open_container()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#ga943150f4e87fd8507da224d22c266100)                | `sub_iter = my_message_iter:open_container(type [, sign [, sub_iter]])` | Creates `sub_iter` if not passed. Returns the `sub_iter` or `nil` on failure
 [`dbus_message_iter_close_container()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#gaf00482f63d4af88b7851621d1f24087a)               | `ok = my_message_iter:close_container(sub_iter)`                        |
+[`dbus_pending_call_cancel()`](http://dbus.freedesktop.org/doc/api/html/group__DBusPendingCall.html#ga6530d18f891d3ca5f5df87ea7c2b155c)                    | `my_pending_call:cancel()`                                              |
+[`dbus_pending_call_get_completed()`](http://dbus.freedesktop.org/doc/api/html/group__DBusPendingCall.html#gacbf33ae8a1cc125628f9ea44d175c159)             | `completed = my_pending_call:get_completed()                            |
+[`dbus_pending_call_steal_reply()`](http://dbus.freedesktop.org/doc/api/html/group__DBusPendingCall.html#ga5a738928c2369fef093ce00658903d06)               | `message = my_pending_call:steal_reply()                                |
+[`dbus_pending_call_block()`](http://dbus.freedesktop.org/doc/api/html/group__DBusPendingCall.html#ga67b99f749a7f477c7b5d70f2acee5452)                     | `my_pending_call:block()`                                               |
 
 
 ### Other
