@@ -266,7 +266,7 @@ static int ldbus_message_iter_open_container(lua_State *L) {
 	} else {
 		lua_settop(L, 4);
 	}
-	sub = luaL_checkudata(L, 4, "ldbus_DBusMessageIter");
+	sub = luaL_checkudata(L, -1, "ldbus_DBusMessageIter");
 
 	if (!dbus_message_iter_open_container(iter, argtype, contained_signature, sub)) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
