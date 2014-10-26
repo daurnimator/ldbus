@@ -55,7 +55,7 @@ local function reply_to_method_call ( msg , conn )
 	local reply = assert ( msg:new_method_return ( ) )
 	reply:iter_init_append ( iter )
 	assert ( iter:append_basic ( stat , ldbus.types.boolean ) , "Out of Memory" )
-	assert ( iter:append_basic ( level ) , "Out of Memory" )
+	assert ( iter:append_basic ( level , ldbus.types.uint32 ) , "Out of Memory" )
 	
 	local ok , serial = assert ( conn:send ( reply ) , "Out of Memory" )
 	conn:flush ( )
