@@ -70,7 +70,7 @@ LDBUS_INTERNAL void ldbus_timeout_remove_function(DBusTimeout *timeout, void *da
 
 	/* Lookup remove callback from ref in `data` */
 	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-	lua_rawgeti(L, -2, DBUS_LUA_FUNC_REMOVE);
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_REMOVE);
 
 	/* Grab timeout from registry */
 	/* this way we can't throw an error */
