@@ -163,5 +163,12 @@ int luaopen_ldbus_watch(lua_State *L) {
 		lua_pushstring(L, "DBusWatch");
 		lua_setfield(L, -2, "__udtype");
 	}
-	return 0;
+
+	lua_createtable(L, 0, 3);
+	lua_pushinteger(L, DBUS_WATCH_READABLE); lua_setfield(L, -2, "READABLE");
+	lua_pushinteger(L, DBUS_WATCH_WRITABLE); lua_setfield(L, -2, "WRITABLE");
+	lua_pushinteger(L, DBUS_WATCH_HANGUP); lua_setfield(L, -2, "HANGUP");
+	lua_pushinteger(L, DBUS_WATCH_ERROR); lua_setfield(L, -2, "ERROR");
+
+	return 1;
 }
