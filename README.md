@@ -111,6 +111,11 @@ example.lua is a lua version of [Matthew Johnson's example](http://dbus.freedesk
 [`dbus_timeout_get_interval()`](http://dbus.freedesktop.org/doc/api/html/group__DBusTimeout.html#ga67ba21b6189438875c6007ee79da5e37)                       | `secs = my_timeout:get_interval()`                                      | Returned number is in seconds (rather than milliseconds)
 [`dbus_timeout_handle()`](http://dbus.freedesktop.org/doc/api/html/group__DBusTimeout.html#ga038b67c8d3db2624a1e4a8bc45f25d12)                             | `ok = my_timeout:handle()`                                              |
 [`dbus_timeout_get_enabled()`](http://dbus.freedesktop.org/doc/api/html/group__DBusTimeout.html#ga58954b2edb45ec1632529d35525ea45c)                        | `enabled = my_timeout:get_enabled()`                                    |
+[`dbus_watch_get_unix_fd()`](http://dbus.freedesktop.org/doc/api/html/group__DBusWatch.html#ga15df7f6120ead3e09bec8a70d3c43c0d)                            | `fd = my_watch:get_unix_fd()`                                           | Returns `nil` when no fd is available
+[`dbus_watch_get_socket()`](http://dbus.freedesktop.org/doc/api/html/group__DBusWatch.html#ga91308f393d41b31babda17c83833517f)                             | `fd = my_watch:get_socket()`                                            | Returns `nil` when no fd is available
+[`dbus_watch_get_flags()`](http://dbus.freedesktop.org/doc/api/html/group__DBusWatch.html#gaf172a2b1d1f82333e67cec8d99c9204a)                              | `flags = my_watch:get_flags()`                                          | `flags` will be the a number
+[`dbus_watch_handle()`](http://dbus.freedesktop.org/doc/api/html/group__DBusWatch.html#gac2acdb1794450ac01a43ec4c3e07ebf7)                                 | `ok = my_watch:handle(flags)`                                           |
+[`dbus_watch_get_enabled()`](http://dbus.freedesktop.org/doc/api/html/group__DBusWatch.html#gae7a91e6d4d1bc187419c47c522e33a8f)                            | `enabled = my_watch:get_enabled()`                                      |
 
 
 ### Other
