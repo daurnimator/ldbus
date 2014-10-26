@@ -20,6 +20,6 @@ LDBUS_INTERNAL void ldbus_watch_remove_function(DBusWatch *watch, void *data);
 LDBUS_INTERNAL void ldbus_watch_toggled_function(DBusWatch *watch, void *data);
 LDBUS_INTERNAL void ldbus_watch_free_data_function(void *data);
 
-int lua_open_ldbus_watch(lua_State *L);
+int luaopen_ldbus_watch(lua_State *L);
 
 #endif

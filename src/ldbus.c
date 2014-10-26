@@ -9,7 +9,7 @@
 #include "bus.h"
 #include "connection.h"
 #include "message.h"
-
+#include "watch.h"
 #include "ldbus.h"
 
 int tostring(lua_State *L) {
@@ -172,6 +172,9 @@ int luaopen_ldbus(lua_State *L) {
 
 	luaL_requiref(L, "ldbus.message", luaopen_ldbus_message, 0);
 	lua_setfield(L, -2, "message");
+
+	luaL_requiref(L, "ldbus.watch", luaopen_ldbus_watch, 0);
+	lua_setfield(L, -2, "watch");
 
 	return 1;
 }

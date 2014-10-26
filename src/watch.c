@@ -143,7 +143,7 @@ LDBUS_INTERNAL void ldbus_watch_free_data_function(void *data) {
 	free(data);
 }
 
-int lua_open_ldbus_watch(lua_State *L) {
+int luaopen_ldbus_watch(lua_State *L) {
 	static luaL_Reg const methods [] = {
 		{ "get_unix_fd", ldbus_watch_get_unix_fd },
 		{ "get_socket", ldbus_watch_get_socket },
