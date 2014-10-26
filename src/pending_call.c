@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include <lua.h>
 #include <lauxlib.h>
 #include "compat-5.2.h"
@@ -17,6 +19,38 @@ static int ldbus_pending_call_unref(lua_State *L) {
 	DBusPendingCall* pending = checkPendingCall(L, 1);
 	dbus_pending_call_unref(pending);
 	return 0;
+}
+
+static void pending_notify_function(DBusPendingCall *pending, void *data) {
+	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int ref = ((ldbus_callback_udata*)data)->ref;
+	UNUSED(pending);
+	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_pcall(L, 0, 0, 0);
+}
+
+static void free_data_function(void *data) {
+	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int ref = ((ldbus_callback_udata*)data)->ref;
+	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	free(data);
+}
+
+static int ldbus_pending_call_set_notify(lua_State *L) {
+	DBusPendingCall* pending = checkPendingCall(L, 1);
+	ldbus_callback_udata *data;
+	luaL_checktype(L, 2, LUA_TFUNCTION);
+	lua_settop(L, 2);
+	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
+		return luaL_error(L, LDBUS_NO_MEMORY);
+	}
+	data->L = L;
+	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	if (!dbus_pending_call_set_notify(pending, pending_notify_function, data, free_data_function)) {
+		return luaL_error(L, LDBUS_NO_MEMORY);
+	}
+	lua_pushboolean(L, 1);
+	return 1;
 }
 
 static int ldbus_pending_call_cancel(lua_State *L) {
@@ -50,6 +84,7 @@ static int ldbus_pending_call_block(lua_State *L) {
 
 LDBUS_INTERNAL void push_DBusPendingCall(lua_State *L, DBusPendingCall* pending) {
 	static luaL_Reg const methods [] = {
+		{ "set_notify",    ldbus_pending_call_set_notify },
 		{ "cancel",        ldbus_pending_call_cancel },
 		{ "get_completed", ldbus_pending_call_get_completed },
 		{ "steal_reply",   ldbus_pending_call_steal_reply },
