@@ -88,7 +88,7 @@ LDBUS_INTERNAL void ldbus_watch_remove_function(DBusWatch *watch, void *data) {
 
 	/* Lookup remove callback from ref in `data` */
 	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-	lua_rawgeti(L, -2, DBUS_LUA_FUNC_REMOVE);
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_REMOVE);
 
 	/* Grab watch from registry */
 	/* this way we can't throw an error */
