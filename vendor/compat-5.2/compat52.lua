@@ -505,18 +505,34 @@ if _VERSION == "Lua 5.1" then
    end
 
    local string_format = string.format
-   function string.format(fmt, ...)
-      local args, n = { ... }, _select('#', ...)
-      local i = 0
-      for lead,kind in fmt:gmatch("(%%*)%%[%d%.%-%+%# ]*(%a)") do
-         if #lead % 2 == 0 then
-           i = i + 1
-           if kind == "s" and _type(args[i]) ~= "string" then
-              args[i] = _tostring(args[i])
-           end
-         end
+   do
+      local addqt = {
+         ["\n"] = "\\\n",
+         ["\\"] = "\\\\",
+         ["\""] = "\\\""
+      }
+
+      local function addquoted(c)
+         return addqt[c] or string_format("\\%03d", c:byte())
       end
-      return string_format(fmt, _unpack(args, 1, n))
+
+      function string.format(fmt, ...)
+         local args, n = { ... }, _select('#', ...)
+         local i = 0
+         local function adjust_fmt(lead, mods, kind)
+            if #lead % 2 == 0 then
+               i = i + 1
+               if kind == "s" then
+                  args[i] = _tostring(args[i])
+               elseif kind == "q" then
+                  args[i] = '"'..string_gsub(args[i], "[%z%c\\\"\n]", addquoted)..'"'
+                  return lead.."%"..mods.."s"
+               end
+            end
+         end
+         fmt = string_gsub(fmt, "(%%*)%%([%d%.%-%+%# ]*)(%a)", adjust_fmt)
+         return string_format(fmt, _unpack(args, 1, n))
+      end
    end
 
    local io_write = io.write
