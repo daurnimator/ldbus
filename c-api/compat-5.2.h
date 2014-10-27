@@ -47,6 +47,8 @@ void luaL_requiref (lua_State *L, char const* modname, lua_CFunction openf, int 
 #if !defined(LUA_VERSION_NUM) || LUA_VERSION_NUM == 501
 /* Lua 5.0 *or* 5.1 */
 
+#define LUA_OK 0
+
 typedef struct luaL_Stream {
   FILE *f;
   lua_CFunction closef;
