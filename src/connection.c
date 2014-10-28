@@ -125,7 +125,7 @@ static int ldbus_connection_send_with_reply_and_block(lua_State *L) {
 	dbus_error_init(&error);
 	reply = dbus_connection_send_with_reply_and_block(connection, message, timeout_milliseconds, &error);
 	if (dbus_error_is_set(&error)) {
-		lua_pushboolean(L, FALSE);
+		lua_pushnil(L);
 		lua_pushstring(L, error.message);
 		dbus_error_free(&error);
 		return 2;
