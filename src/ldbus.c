@@ -74,6 +74,32 @@ int luaopen_ldbus(lua_State *L) {
 	lua_setfield(L, -2, "dict_entry");
 	lua_setfield(L, -2, "types");
 
+	/* Seperate table of just the basic types */
+	lua_newtable(L);
+	lua_pushliteral(L, DBUS_TYPE_BYTE_AS_STRING);
+	lua_setfield(L, -2, "byte");
+	lua_pushliteral(L, DBUS_TYPE_BOOLEAN_AS_STRING);
+	lua_setfield(L, -2, "boolean");
+	lua_pushliteral(L, DBUS_TYPE_INT16_AS_STRING);
+	lua_setfield(L, -2, "int16");
+	lua_pushliteral(L, DBUS_TYPE_UINT16_AS_STRING);
+	lua_setfield(L, -2, "uint16");
+	lua_pushliteral(L, DBUS_TYPE_INT32_AS_STRING);
+	lua_setfield(L, -2, "int32");
+	lua_pushliteral(L, DBUS_TYPE_UINT32_AS_STRING);
+	lua_setfield(L, -2, "uint32");
+	lua_pushliteral(L, DBUS_TYPE_INT64_AS_STRING);
+	lua_setfield(L, -2, "int64");
+	lua_pushliteral(L, DBUS_TYPE_UINT64_AS_STRING);
+	lua_setfield(L, -2, "uint64");
+	lua_pushliteral(L, DBUS_TYPE_STRING_AS_STRING);
+	lua_setfield(L, -2, "string");
+	lua_pushliteral(L, DBUS_TYPE_OBJECT_PATH_AS_STRING);
+	lua_setfield(L, -2, "object_path");
+	lua_pushliteral(L, DBUS_TYPE_SIGNATURE_AS_STRING);
+	lua_setfield(L, -2, "signature");
+	lua_setfield(L, -2, "basic_types");
+
 	/* Errors */
 	lua_newtable(L);
 	lua_pushstring(L, DBUS_ERROR_FAILED);
