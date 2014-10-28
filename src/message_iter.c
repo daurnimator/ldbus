@@ -199,7 +199,7 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 					value.uint64 = (uint64_t)value.dbl;
 					break;
 				default:
-					return luaL_argerror(L, 3, "cannot convert number to given type");
+					return luaL_argerror(L, 2, "cannot convert number to given type");
 			}
 			break;
 		case LUA_TBOOLEAN:
@@ -220,7 +220,7 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 					value.dbl = (double)value.uint32;
 					break;
 				default:
-					return luaL_argerror(L, 3, "cannot convert boolean to given type");
+					return luaL_argerror(L, 2, "cannot convert boolean to given type");
 			}
 			break;
 		case LUA_TSTRING:
@@ -233,7 +233,7 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 				case DBUS_TYPE_SIGNATURE:
 					break;
 				default:
-					return luaL_argerror(L, 3, "cannot convert string to given type");
+					return luaL_argerror(L, 2, "cannot convert string to given type");
 			}
 			break;
 		case LUA_TNIL:
@@ -243,7 +243,7 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 		case LUA_TTHREAD:
 		case LUA_TLIGHTUSERDATA:
 		default:
-			return luaL_argerror(L, 3, lua_pushfstring(L, "number, boolean or string expected, got %s", luaL_typename(L, 3)));
+			return luaL_argerror(L, 2, lua_pushfstring(L, "number, boolean or string expected, got %s", luaL_typename(L, 2)));
 	}
 
 	lua_pushboolean(L, dbus_message_iter_append_basic(iter, argtype, &value));
