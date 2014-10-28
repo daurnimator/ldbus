@@ -33,6 +33,7 @@ build = {
 			},
 			libraries = { "dbus-1" },
 			incdirs = { "$(DBUS_INCDIR)", "$(DBUS_ARCH_INCDIR)", "vendor/compat-5.2/c-api/" }
-		}
+		};
+		["ldbus.message.variant"] = "src/message/variant.lua";
 	}
 }
