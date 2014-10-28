@@ -125,6 +125,49 @@ example.lua is a lua version of [Matthew Johnson's example](http://dbus.freedesk
 
 ### Other
 
+#### `ldbus.types`
+
+A table of the dbus types from name to type (as a character)
+
+ key            | value
+----------------|-------
+`"invalid"`     | `"\0"`
+`"boolean"`     | `"b"`
+`"byte"`        | `"y"`
+`"int16"`       | `"n"`
+`"int32"`       | `"i"`
+`"int64"`       | `"x"`
+`"uint16"`      | `"q"`
+`"uint32"`      | `"u"`
+`"uint64"`      | `"t"`
+`"string"`      | `"s"`
+`"signature"`   | `"g"`
+`"object_path"` | `"o"`
+`"array"`       | `"a"`
+`"dict_entry"`  | `"e"`
+`"variant"`     | `"v"`
+`"struct"`      | `"r"`
+
+
+#### `ldbus.basic_types`
+
+A table of the dbus basic types from name to type (as a character)
+
+ key            | value
+----------------|-------
+`"boolean"`     | `"b"`
+`"byte"`        | `"y"`
+`"int16"`       | `"n"`
+`"int32"`       | `"i"`
+`"int64"`       | `"x"`
+`"uint16"`      | `"q"`
+`"uint32"`      | `"u"`
+`"uint64"`      | `"t"`
+`"string"`      | `"s"`
+`"signature"`   | `"g"`
+`"object_path"` | `"o"`
+
+
 #### `my_iter = ldbus.message.iter.new()`
 
 Creates a new `DBusMessageIter` object
