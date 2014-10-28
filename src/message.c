@@ -134,17 +134,24 @@ static int ldbus_message_get_type(lua_State *L) {
 
 static int ldbus_message_iter_init(lua_State *L) {
 	DBusMessage *message = check_DBusMessage(L, 1);
-	DBusMessageIter * iter = luaL_checkudata(L, 2, "ldbus_DBusMessageIter");
+	DBusMessageIter *iter;
+	if (lua_gettop(L) == 1) {
+		push_DBusMessageIter(L);
+	} else {
+		lua_settop(L, 2);
+	}
+	iter = luaL_checkudata(L, 2, "ldbus_DBusMessageIter");
 
-	lua_pushboolean(L, dbus_message_iter_init(message, iter));
+	if (!dbus_message_iter_init(message, iter)) {
+		lua_pushnil(L);
+	}
 
 	return 1;
 }
 
 static int ldbus_message_iter_init_append(lua_State *L) {
 	DBusMessage *message = check_DBusMessage(L, 1);
-
-	DBusMessageIter * iter;
+	DBusMessageIter *iter;
 	if (lua_gettop(L) == 1) {
 		push_DBusMessageIter(L);
 	} else {
