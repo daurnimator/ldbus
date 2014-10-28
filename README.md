@@ -131,7 +131,6 @@ A table of the dbus types from name to type (as a character)
 
  key            | value
 ----------------|-------
-`"invalid"`     | `"\0"`
 `"boolean"`     | `"b"`
 `"byte"`        | `"y"`
 `"int16"`       | `"n"`

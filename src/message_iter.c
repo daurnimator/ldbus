@@ -54,7 +54,11 @@ static int ldbus_message_iter_get_arg_type(lua_State *L) {
 	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
 
 	char type = (char)dbus_message_iter_get_arg_type(iter);
-	lua_pushlstring(L, &type, 1);
+	if (type == DBUS_TYPE_INVALID) {
+		lua_pushnil(L);
+	} else {
+		lua_pushlstring(L, &type, 1);
+	}
 
 	return 1;
 }
