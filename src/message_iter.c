@@ -1,5 +1,6 @@
 #include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include <lua.h>
 #include <lauxlib.h>
@@ -24,6 +25,14 @@ typedef union {
 	/* float       flt; */
 	const char *str;
 } basic_type_u;
+
+static int ldbus_message_iter_clone(lua_State *L) {
+	DBusMessageIter *iter = luaL_checkudata(L, 1, "ldbus_DBusMessageIter");
+	push_DBusMessageIter(L);
+	DBusMessageIter *clone = lua_touserdata(L, -1);
+	memcpy(clone, iter, sizeof(DBusMessageIter));
+	return 1;
+}
 
 static int ldbus_message_iter_has_next(lua_State *L) {
 	DBusMessageIter * iter = luaL_checkudata(L, 1, "ldbus_DBusMessageIter");
@@ -286,6 +295,7 @@ static int ldbus_message_iter_close_container(lua_State *L) {
 
 LDBUS_INTERNAL int push_DBusMessageIter(lua_State *L) {
 	static luaL_Reg const methods [] = {
+		{ "clone",            ldbus_message_iter_clone },
 		{ "has_next",         ldbus_message_iter_has_next },
 		{ "next",             ldbus_message_iter_next },
 		{ "get_arg_type",     ldbus_message_iter_get_arg_type },

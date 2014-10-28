@@ -130,3 +130,7 @@ example.lua is a lua version of [Matthew Johnson's example](http://dbus.freedesk
 Creates a new `DBusMessageIter` object
 
 
+#### `new_iter = my_iter:clone()`
+
+Creates a copy of the given `DBusMessageIter`
+
