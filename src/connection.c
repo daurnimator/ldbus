@@ -105,7 +105,7 @@ static int ldbus_connection_send(lua_State *L) {
 static int ldbus_connection_send_with_reply(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	DBusMessage *message = check_DBusMessage(L, 2);
-	int timeout_milliseconds = luaL_optint(L, 3, -1);
+	int timeout_milliseconds = lua_isnoneornil(L, 3) ? (-1) : (luaL_checknumber(L, 3) * 1000);
 
 	DBusPendingCall *pending;
 	if (!dbus_connection_send_with_reply(connection, message, &pending, timeout_milliseconds)) {
@@ -119,7 +119,7 @@ static int ldbus_connection_send_with_reply(lua_State *L) {
 static int ldbus_connection_send_with_reply_and_block(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	DBusMessage *message = check_DBusMessage(L, 2);
-	int timeout_milliseconds = luaL_optint(L, 3, -1);
+	int timeout_milliseconds = lua_isnoneornil(L, 3) ? (-1) : (luaL_checknumber(L, 3) * 1000);
 	DBusMessage *reply;
 	DBusError error;
 	dbus_error_init(&error);
