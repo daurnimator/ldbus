@@ -46,6 +46,8 @@ int luaopen_ldbus(lua_State *L) {
 	lua_setfield(L, -2, "byte");
 	lua_pushliteral(L, DBUS_TYPE_BOOLEAN_AS_STRING);
 	lua_setfield(L, -2, "boolean");
+	lua_pushliteral(L, DBUS_TYPE_DOUBLE_AS_STRING);
+	lua_setfield(L, -2, "double");
 	lua_pushliteral(L, DBUS_TYPE_INT16_AS_STRING);
 	lua_setfield(L, -2, "int16");
 	lua_pushliteral(L, DBUS_TYPE_UINT16_AS_STRING);
@@ -80,6 +82,8 @@ int luaopen_ldbus(lua_State *L) {
 	lua_setfield(L, -2, "byte");
 	lua_pushliteral(L, DBUS_TYPE_BOOLEAN_AS_STRING);
 	lua_setfield(L, -2, "boolean");
+	lua_pushliteral(L, DBUS_TYPE_DOUBLE_AS_STRING);
+	lua_setfield(L, -2, "double");
 	lua_pushliteral(L, DBUS_TYPE_INT16_AS_STRING);
 	lua_setfield(L, -2, "int16");
 	lua_pushliteral(L, DBUS_TYPE_UINT16_AS_STRING);
