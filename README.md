@@ -134,6 +134,7 @@ A table of the dbus types from name to type (as a character)
 ----------------|-------
 `"boolean"`     | `"b"`
 `"byte"`        | `"y"`
+`"double"`      | `"d"`
 `"int16"`       | `"n"`
 `"int32"`       | `"i"`
 `"int64"`       | `"x"`
@@ -157,6 +158,7 @@ A table of the dbus basic types from name to type (as a character)
 ----------------|-------
 `"boolean"`     | `"b"`
 `"byte"`        | `"y"`
+`"double"`      | `"d"`
 `"int16"`       | `"n"`
 `"int32"`       | `"i"`
 `"int64"`       | `"x"`
