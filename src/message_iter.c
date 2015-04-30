@@ -184,40 +184,74 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 
 	switch (lua_type(L, 2)) {
 		case LUA_TNUMBER:
-			value.dbl = lua_tonumber(L, 2);
-			switch (argtype) {
-				case 0:
-					argtype = DBUS_TYPE_DOUBLE; /* Lua numbers are doubles by default */
-				case DBUS_TYPE_DOUBLE:
-					break;
-				case DBUS_TYPE_BYTE:
-					value.uint8 = (uint8_t)value.dbl;
-					break;
-				case DBUS_TYPE_INT16:
-					value.int16 = (int16_t)value.dbl;
-					break;
-				case DBUS_TYPE_UINT16:
-					value.uint16 = (uint16_t)value.dbl;
-					break;
-				case DBUS_TYPE_INT32:
-					value.int32 = (int32_t)value.dbl;
-					break;
-				case DBUS_TYPE_BOOLEAN:
-				case DBUS_TYPE_UINT32:
-					value.uint32 = (uint32_t)value.dbl;
-					break;
-				case DBUS_TYPE_INT64:
-					value.int64 = (int64_t)value.dbl;
-					break;
-				case DBUS_TYPE_UINT64:
-					value.uint64 = (uint64_t)value.dbl;
-					break;
-				default:
-					return luaL_argerror(L, 2, "cannot convert number to given type");
+			if (lua_isinteger(L, 2)) {
+				value.int64 = lua_tointeger(L, 2);
+				switch (argtype) {
+					case 0:
+						argtype = DBUS_TYPE_INT64;
+					case DBUS_TYPE_INT64:
+						break;
+					case DBUS_TYPE_BYTE:
+						value.uint8 = value.int64;
+						break;
+					case DBUS_TYPE_INT16:
+						value.int16 = value.int64;
+						break;
+					case DBUS_TYPE_UINT16:
+						value.uint16 = value.int64;
+						break;
+					case DBUS_TYPE_INT32:
+						value.int32 = value.int64;
+						break;
+					case DBUS_TYPE_BOOLEAN:
+					case DBUS_TYPE_UINT32:
+						value.uint32 = value.int64;
+						break;
+					case DBUS_TYPE_UINT64:
+						value.uint64 = value.int64;
+						break;
+					case DBUS_TYPE_DOUBLE:
+						value.dbl = value.int64;
+						break;
+					default:
+						return luaL_argerror(L, 2, "cannot convert number to given type");
+				}
+			} else {
+				value.dbl = lua_tonumber(L, 2);
+				switch (argtype) {
+					case 0:
+						argtype = DBUS_TYPE_DOUBLE; /* Lua numbers are doubles by default */
+					case DBUS_TYPE_DOUBLE:
+						break;
+					case DBUS_TYPE_BYTE:
+						value.uint8 = value.dbl;
+						break;
+					case DBUS_TYPE_INT16:
+						value.int16 = value.dbl;
+						break;
+					case DBUS_TYPE_UINT16:
+						value.uint16 = value.dbl;
+						break;
+					case DBUS_TYPE_INT32:
+						value.int32 = value.dbl;
+						break;
+					case DBUS_TYPE_BOOLEAN:
+					case DBUS_TYPE_UINT32:
+						value.uint32 = value.dbl;
+						break;
+					case DBUS_TYPE_INT64:
+						value.int64 = value.dbl;
+						break;
+					case DBUS_TYPE_UINT64:
+						value.uint64 = value.dbl;
+						break;
+					default:
+						return luaL_argerror(L, 2, "cannot convert number to given type");
+				}
 			}
 			break;
 		case LUA_TBOOLEAN:
-			value.uint32 = (uint32_t)lua_toboolean(L, 2);
+			value.uint32 = lua_toboolean(L, 2);
 			switch (argtype) {
 				case 0:
 					argtype = DBUS_TYPE_BOOLEAN;
@@ -231,7 +265,7 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 				case DBUS_TYPE_UINT64:
 					break;
 				case DBUS_TYPE_DOUBLE:
-					value.dbl = (double)value.uint32;
+					value.dbl = value.uint32;
 					break;
 				default:
 					return luaL_argerror(L, 2, "cannot convert boolean to given type");
