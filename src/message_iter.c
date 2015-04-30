@@ -105,39 +105,39 @@ static int ldbus_message_iter_get_signature(lua_State *L) {
 static int ldbus_message_iter_get_basic(lua_State *L) {
 	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
 
-	basic_type_u value;
+	DBusBasicValue value;
 	switch (dbus_message_iter_get_arg_type(iter)) {
 		case DBUS_TYPE_BOOLEAN:
-			dbus_message_iter_get_basic(iter, &value.uint32);
-			lua_pushboolean(L, value.uint32);
+			dbus_message_iter_get_basic(iter, &value.u32);
+			lua_pushboolean(L, value.u32);
 			break;
 		case DBUS_TYPE_BYTE:
-			dbus_message_iter_get_basic(iter, &value.uint8);
-			lua_pushnumber(L, value.uint8);
+			dbus_message_iter_get_basic(iter, &value.byt);
+			lua_pushnumber(L, value.byt);
 			break;
 		case DBUS_TYPE_INT16:
-			dbus_message_iter_get_basic(iter, &value.int16);
-			lua_pushnumber(L, value.int16);
+			dbus_message_iter_get_basic(iter, &value.i16);
+			lua_pushnumber(L, value.i16);
 			break;
 		case DBUS_TYPE_UINT16:
-			dbus_message_iter_get_basic(iter, &value.uint16);
-			lua_pushnumber(L, value.uint16);
+			dbus_message_iter_get_basic(iter, &value.u16);
+			lua_pushnumber(L, value.u16);
 			break;
 		case DBUS_TYPE_INT32:
-			dbus_message_iter_get_basic(iter, &value.int32);
-			lua_pushnumber(L, value.int32);
+			dbus_message_iter_get_basic(iter, &value.i32);
+			lua_pushnumber(L, value.i32);
 			break;
 		case DBUS_TYPE_UINT32:
-			dbus_message_iter_get_basic(iter, &value.uint32);
-			lua_pushnumber(L, value.uint32);
+			dbus_message_iter_get_basic(iter, &value.u32);
+			lua_pushnumber(L, value.u32);
 			break;
 		case DBUS_TYPE_INT64:
-			dbus_message_iter_get_basic(iter, &value.int64);
-			lua_pushnumber(L, value.int64);
+			dbus_message_iter_get_basic(iter, &value.i64);
+			lua_pushnumber(L, value.i64);
 			break;
 		case DBUS_TYPE_UINT64:
-			dbus_message_iter_get_basic(iter, &value.uint64);
-			lua_pushnumber(L, value.uint64);
+			dbus_message_iter_get_basic(iter, &value.u64);
+			lua_pushnumber(L, value.u64);
 			break;
 		case DBUS_TYPE_DOUBLE:
 			dbus_message_iter_get_basic(iter, &value.dbl);
