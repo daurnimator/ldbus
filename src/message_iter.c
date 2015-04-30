@@ -113,31 +113,31 @@ static int ldbus_message_iter_get_basic(lua_State *L) {
 			break;
 		case DBUS_TYPE_BYTE:
 			dbus_message_iter_get_basic(iter, &value.byt);
-			lua_pushnumber(L, value.byt);
+			lua_pushinteger(L, value.byt);
 			break;
 		case DBUS_TYPE_INT16:
 			dbus_message_iter_get_basic(iter, &value.i16);
-			lua_pushnumber(L, value.i16);
+			lua_pushinteger(L, value.i16);
 			break;
 		case DBUS_TYPE_UINT16:
 			dbus_message_iter_get_basic(iter, &value.u16);
-			lua_pushnumber(L, value.u16);
+			lua_pushinteger(L, value.u16);
 			break;
 		case DBUS_TYPE_INT32:
 			dbus_message_iter_get_basic(iter, &value.i32);
-			lua_pushnumber(L, value.i32);
+			lua_pushinteger(L, value.i32);
 			break;
 		case DBUS_TYPE_UINT32:
 			dbus_message_iter_get_basic(iter, &value.u32);
-			lua_pushnumber(L, value.u32);
+			lua_pushinteger(L, value.u32);
 			break;
 		case DBUS_TYPE_INT64:
 			dbus_message_iter_get_basic(iter, &value.i64);
-			lua_pushnumber(L, value.i64);
+			lua_pushinteger(L, value.i64);
 			break;
 		case DBUS_TYPE_UINT64:
 			dbus_message_iter_get_basic(iter, &value.u64);
-			lua_pushnumber(L, value.u64);
+			lua_pushinteger(L, value.u64);
 			break;
 		case DBUS_TYPE_DOUBLE:
 			dbus_message_iter_get_basic(iter, &value.dbl);
