@@ -12,7 +12,10 @@ dependencies = {
 	 "lua >= 5.1"
 }
 external_dependencies = {
-	DBUS = { header = "dbus/dbus.h" },
+	DBUS = {
+		header = "dbus/dbus.h";
+		library = "dbus-1";
+	};
 	DBUS_ARCH = { header = "dbus/dbus-arch-deps.h" }
 }
 build = {
