@@ -10,7 +10,7 @@ Compatible with Lua 5.1, 5.2 and 5.3 (thanks [compat-5.3](https://github.com/kep
 
 # Installation
 
-ldbus is on moonrocks: https://luarocks.org/modules/daurnimator/ldbus
+ldbus is on luarocks: https://luarocks.org/modules/daurnimator/ldbus
 
 Install via luarocks, you will need to provide paths to `dbus/dbus.h` and `dbus/dbus-arch-deps.h`
 
@@ -19,7 +19,7 @@ Install via luarocks, you will need to provide paths to `dbus/dbus.h` and `dbus/
 
 # Usage
 
-example.lua is a lua version of [Matthew Johnson's example](http://dbus.freedesktop.org/doc/dbus/libdbus-tutorial.html)
+example.lua is a lua version of [Matthew Johnson's example](https://web.archive.org/web/20101224005221/http://dbus.freedesktop.org/doc/dbus/libdbus-tutorial.html)
 
 
 ### Bound from C
