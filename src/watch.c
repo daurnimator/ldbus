@@ -2,7 +2,7 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-#include "compat-5.2.h"
+#include "compat-5.3.h"
 
 #include <dbus/dbus.h>
 
@@ -35,7 +35,7 @@ static int ldbus_watch_get_socket(lua_State *L) {
 static int ldbus_watch_get_flags(lua_State *L) {
 	DBusWatch *watch = check_DBusWatch(L, 1);
 	unsigned int flags = (watch == NULL) ? 0 : dbus_watch_get_flags(watch);
-	lua_pushunsigned(L, flags);
+	lua_pushinteger(L, flags);
 	return 1;
 }
 
@@ -44,7 +44,7 @@ static int ldbus_watch_handle(lua_State *L) {
 	int flags;
 	dbus_bool_t ok;
 	luaL_argcheck(L, watch != NULL, 1, "watch invalid");
-	flags = luaL_checkint(L, 2);
+	flags = luaL_checkinteger(L, 2);
 	ok = dbus_watch_handle(watch, flags);
 	lua_pushboolean(L, ok);
 	return 1;

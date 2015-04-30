@@ -9,7 +9,7 @@ description = {
 	 license = "MIT/X11"
 }
 dependencies = {
-	 "lua >= 5.1, < 5.3"
+	 "lua >= 5.1"
 }
 external_dependencies = {
 	DBUS = { header = "dbus/dbus.h" },
@@ -29,10 +29,10 @@ build = {
 				"src/pending_call.c",
 				"src/timeout.c",
 				"src/watch.c",
-				"vendor/compat-5.2/c-api/compat-5.2.c"
+				"vendor/compat-5.3/c-api/compat-5.3.c"
 			},
 			libraries = { "dbus-1" },
-			incdirs = { "$(DBUS_INCDIR)", "$(DBUS_ARCH_INCDIR)", "vendor/compat-5.2/c-api/" }
+			incdirs = { "$(DBUS_INCDIR)", "$(DBUS_ARCH_INCDIR)", "vendor/compat-5.3/c-api/" }
 		};
 		["ldbus.message.variant"] = "src/message/variant.lua";
 	}

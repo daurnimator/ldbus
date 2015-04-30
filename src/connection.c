@@ -3,7 +3,7 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-#include "compat-5.2.h"
+#include "compat-5.3.h"
 
 #include <dbus/dbus.h>
 
@@ -145,7 +145,7 @@ static int ldbus_connection_flush(lua_State *L) {
 
 static int ldbus_connection_read_write_dispatch(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
-	int timeout_milliseconds = luaL_optint(L, 2, -1);
+	int timeout_milliseconds = luaL_optinteger(L, 2, -1);
 
 	lua_pushboolean(L, dbus_connection_read_write_dispatch(connection, timeout_milliseconds));
 
@@ -154,7 +154,7 @@ static int ldbus_connection_read_write_dispatch(lua_State *L) {
 
 static int ldbus_connection_read_write(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
-	int timeout_milliseconds = luaL_optint(L, 2, -1);
+	int timeout_milliseconds = luaL_optinteger(L, 2, -1);
 
 	lua_pushboolean(L, dbus_connection_read_write(connection, timeout_milliseconds));
 
@@ -307,7 +307,7 @@ static int ldbus_connection_set_dispatch_status_function(lua_State *L) {
 
 static int ldbus_connection_set_max_message_size(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
-	long size = luaL_checklong(L, 2);
+	long size = luaL_checkinteger(L, 2);
 
 	dbus_connection_set_max_message_size(connection, size);
 
@@ -324,7 +324,7 @@ static int ldbus_connection_get_max_message_size(lua_State *L) {
 
 static int ldbus_connection_set_max_received_size(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
-	long size = luaL_checklong(L, 2);
+	long size = luaL_checkinteger(L, 2);
 
 	dbus_connection_set_max_received_size(connection, size);
 

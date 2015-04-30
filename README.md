@@ -2,7 +2,7 @@
 
 ldbus is a C binding to dbus for Lua.
 
-Compatible with Lua 5.1 and 5.2 (thanks [compat-5.2](https://github.com/hishamhm/lua-compat-5.2)).
+Compatible with Lua 5.1, 5.2 and 5.3 (thanks [compat-5.3](https://github.com/keplerproject/lua-compat-5.3)).
 
 
 # Status

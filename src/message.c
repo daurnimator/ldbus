@@ -2,7 +2,7 @@
 
 #include <lua.h>
 #include <lauxlib.h>
-#include "compat-5.2.h"
+#include "compat-5.3.h"
 
 #include <dbus/dbus.h>
 
@@ -23,7 +23,7 @@ static int ldbus_message_get_serial(lua_State *L) {
 
 static int ldbus_message_set_reply_serial(lua_State *L) {
 	DBusMessage *message = check_DBusMessage(L, 1);
-	dbus_uint32_t reply_serial = luaL_checkint(L, 2);
+	dbus_uint32_t reply_serial = luaL_checkinteger(L, 2);
 
 	lua_pushboolean(L, dbus_message_set_reply_serial(message, reply_serial));
 
