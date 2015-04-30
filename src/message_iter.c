@@ -28,8 +28,9 @@ typedef union {
 
 static int ldbus_message_iter_clone(lua_State *L) {
 	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
+	DBusMessageIter *clone;
 	push_DBusMessageIter(L);
-	DBusMessageIter *clone = lua_touserdata(L, -1);
+	clone = lua_touserdata(L, -1);
 	memcpy(clone, iter, sizeof(DBusMessageIter));
 	return 1;
 }
