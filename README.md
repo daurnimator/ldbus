@@ -10,11 +10,11 @@ Compatible with Lua 5.1, 5.2 and 5.3 (thanks [compat-5.3](https://github.com/kep
 
 # Installation
 
-ldbus is on moonrocks: https://rocks.moonscript.org/modules/daurnimator/ldbus
+ldbus is on moonrocks: https://luarocks.org/modules/daurnimator/ldbus
 
 Install via luarocks, you will need to provide paths to `dbus/dbus.h` and `dbus/dbus-arch-deps.h`
 
-    luarocks install --server=http://rocks.moonscript.org/manifests/daurnimator ldbus DBUS_INCDIR=/usr/include/dbus-1.0/ DBUS_ARCH_INCDIR=/usr/lib/dbus-1.0/include
+    luarocks install --server=http://luarocks.org/manifests/daurnimator ldbus DBUS_INCDIR=/usr/include/dbus-1.0/ DBUS_ARCH_INCDIR=/usr/lib/dbus-1.0/include
 
 
 # Usage
