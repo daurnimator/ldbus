@@ -61,6 +61,23 @@ static int ldbus_bus_get(lua_State *L) {
 	}
 }
 
+static int ldbus_bus_get_private(lua_State *L) {
+	int type = luaL_checkoption(L, 1, NULL, BusType_lst);
+
+	DBusError *error = new_DBusError(L);
+	DBusConnection *connection = dbus_bus_get_private(type, error);
+
+	if (dbus_error_is_set(error)) {
+		lua_pushboolean(L, FALSE);
+		lua_pushstring(L, error->message);
+		return 2;
+	} else {
+		dbus_connection_set_exit_on_disconnect(connection, FALSE);
+		push_DBusConnection(L, connection, TRUE);
+		return 1;
+	}
+}
+
 static int ldbus_bus_register(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 
@@ -226,6 +243,7 @@ static int ldbus_bus_remove_match(lua_State *L) {
 int luaopen_ldbus_bus(lua_State *L) {
 	static const struct luaL_Reg ldbus_bus [] = {
 		{ "get",                   ldbus_bus_get },
+		{ "get_private",           ldbus_bus_get_private },
 		{ "register",              ldbus_bus_register },
 		{ "set_unique_name",       ldbus_bus_set_unique_name },
 		{ "get_unique_name",       ldbus_bus_get_unique_name },
