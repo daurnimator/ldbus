@@ -49,6 +49,9 @@ build = {
 				"$(DBUS_ARCH_INCDIR)";
 				"vendor/compat-5.3/c-api/";
 			};
+			libdirs = {
+				"$(DBUS_LIBDIR)";
+			};
 		};
 		["ldbus.message.variant"] = "src/message/variant.lua";
 	};
