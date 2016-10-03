@@ -193,6 +193,10 @@ static int ldbus_connection_set_watch_functions(lua_State *L) {
 
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	int has_toggle = lua_isnil(L, 4);
+	int Lref = LUA_NOREF;
+	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
+		Lref = luaL_ref(L, -1);
+	}
 	lua_settop(L, 4);
 	/* Place a table below the 3 callback argument */
 	lua_createtable(L, 0, 3);
@@ -208,6 +212,7 @@ static int ldbus_connection_set_watch_functions(lua_State *L) {
 
 	if ((data = malloc(sizeof(ldbus_watch_udata))) == NULL) return luaL_error(L, LDBUS_NO_MEMORY);
 	data->L = L;
+	data->Lref = Lref;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	if (!dbus_connection_set_watch_functions(connection,
@@ -225,6 +230,10 @@ static int ldbus_connection_set_timeout_functions(lua_State *L) {
 	ldbus_timeout_udata *data;
 
 	DBusConnection *connection = check_DBusConnection(L, 1);
+	int Lref = LUA_NOREF;
+	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
+		Lref = luaL_ref(L, -1);
+	}
 	lua_settop(L, 4);
 	/* Place a table below the 3 callback argument */
 	lua_createtable(L, 0, 3);
@@ -240,6 +249,7 @@ static int ldbus_connection_set_timeout_functions(lua_State *L) {
 
 	if ((data = malloc(sizeof(ldbus_timeout_udata))) == NULL) return luaL_error(L, LDBUS_NO_MEMORY);
 	data->L = L;
+	data->Lref = Lref;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 
 	if (!dbus_connection_set_timeout_functions(connection,
@@ -254,8 +264,10 @@ static int ldbus_connection_set_timeout_functions(lua_State *L) {
 
 static void free_data_function(void *data) {
 	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int Lref = ((ldbus_callback_udata*)data)->Lref;
 	int ref = ((ldbus_callback_udata*)data)->ref;
 	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	luaL_unref(L, LUA_REGISTRYINDEX, Lref);
 	free(data);
 }
 
@@ -270,11 +282,16 @@ static int ldbus_connection_set_wakeup_main_function(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	ldbus_callback_udata *data;
 	luaL_checktype(L, 2, LUA_TFUNCTION);
+	int Lref = LUA_NOREF;
+	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
+		Lref = luaL_ref(L, -1);
+	}
 	lua_settop(L, 2);
 	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
 	data->L = L;
+	data->Lref = Lref;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	dbus_connection_set_wakeup_main_function(connection, wakeup_main_function, data, free_data_function);
 	lua_pushboolean(L, 1);
@@ -294,11 +311,16 @@ static int ldbus_connection_set_dispatch_status_function(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	ldbus_callback_udata *data;
 	luaL_checktype(L, 2, LUA_TFUNCTION);
+	int Lref = LUA_NOREF;
+	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
+		Lref = luaL_ref(L, -1);
+	}
 	lua_settop(L, 2);
 	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
 	data->L = L;
+	data->Lref = Lref;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	dbus_connection_set_dispatch_status_function(connection, dispatch_status_function, data, free_data_function);
 	lua_pushboolean(L, 1);
@@ -357,9 +379,11 @@ static int ldbus_connection_has_messages_to_send(lua_State *L) {
 
 static void unregister_function(DBusConnection *connection, void *data) {
 	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int Lref = ((ldbus_callback_udata*)data)->Lref;
 	int ref = ((ldbus_callback_udata*)data)->ref;
 	UNUSED(connection);
 	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	luaL_unref(L, LUA_REGISTRYINDEX, Lref);
 	free(data);
 }
 
@@ -398,11 +422,16 @@ static int ldbus_connection_register_object_path(lua_State *L) {
 	const char *path = luaL_checkstring(L, 2);
 	ldbus_callback_udata *data;
 	luaL_checktype(L, 3, LUA_TFUNCTION);
+	int Lref = LUA_NOREF;
+	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
+		Lref = luaL_ref(L, -1);
+	}
 	lua_settop(L, 3);
 	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
 	data->L = L;
+	data->Lref = Lref;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	if (!dbus_connection_register_object_path(connection, path, &VTable, data)) {
 		free(data);
@@ -417,11 +446,16 @@ static int ldbus_connection_register_fallback(lua_State *L) {
 	const char *path = luaL_checkstring(L, 2);
 	ldbus_callback_udata *data;
 	luaL_checktype(L, 3, LUA_TFUNCTION);
+	int Lref = LUA_NOREF;
+	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
+		Lref = luaL_ref(L, -1);
+	}
 	lua_settop(L, 3);
 	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
 	data->L = L;
+	data->Lref = Lref;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	if (!dbus_connection_register_fallback(connection, path, &VTable, data)) {
 		free(data);

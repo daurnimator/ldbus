@@ -9,6 +9,7 @@
 
 typedef struct {
 	lua_State* L;
+	int Lref;
 	int ref;
 } ldbus_callback_udata;
 

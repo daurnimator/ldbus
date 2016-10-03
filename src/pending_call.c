@@ -31,20 +31,27 @@ static void pending_notify_function(DBusPendingCall *pending, void *data) {
 
 static void free_data_function(void *data) {
 	lua_State *L = ((ldbus_callback_udata*)data)->L;
+	int Lref = ((ldbus_callback_udata*)data)->Lref;
 	int ref = ((ldbus_callback_udata*)data)->ref;
 	luaL_unref(L, LUA_REGISTRYINDEX, ref);
+	luaL_unref(L, LUA_REGISTRYINDEX, Lref);
 	free(data);
 }
 
 static int ldbus_pending_call_set_notify(lua_State *L) {
 	DBusPendingCall* pending = checkPendingCall(L, 1);
 	ldbus_callback_udata *data;
+	int Lref = LUA_NOREF;
 	luaL_checktype(L, 2, LUA_TFUNCTION);
+	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
+		Lref = luaL_ref(L, -1);
+	}
 	lua_settop(L, 2);
 	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
 	data->L = L;
+	data->Lref = Lref;
 	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
 	if (!dbus_pending_call_set_notify(pending, pending_notify_function, data, free_data_function)) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
