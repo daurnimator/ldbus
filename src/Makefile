@@ -1,11 +1,12 @@
 LUA_LIBDIR = /usr/local/lib/lua/5.3
+PKG_CONFIG = pkg-config
 
 CFLAGS += -Wall -Wextra --pedantic -Wno-long-long
-CFLAGS += `pkg-config --cflags lua5.3 dbus-1`
+CFLAGS += `$(PKG_CONFIG) --cflags lua5.3 dbus-1`
 CFLAGS += -fPIC
 CFLAGS += -I ../vendor/compat-5.3/c-api
 
-LIBS = `pkg-config --libs dbus-1`
+LIBS = `$(PKG_CONFIG) --libs dbus-1`
 
 OBJS = ldbus.o error.o pending_call.o connection.o bus.o message.o message_iter.o timeout.o watch.o ../vendor/compat-5.3/c-api/compat-5.3.o
 
