@@ -40,18 +40,29 @@ local mode = "global"
 if arg[1] == "module" then
   mode = "module"
 end
+local self = arg[0]
 
-
-package.path = "../?.lua;../?/init.lua;"..package.path
+package.path = "../?.lua;../?/init.lua"
 package.cpath = "./?-"..V..".so;./?-"..V..".dll;./?.so;./?.dll"
 if mode == "module" then
-  print( "testing Lua API using `compat53.module` ..." )
+  print("testing Lua API using `compat53.module` ...")
   _ENV = require("compat53.module")
   if setfenv then setfenv(1, _ENV) end
 else
-  print( "testing Lua API using `compat53` ..." )
+  print("testing Lua API using `compat53` ...")
   require("compat53")
 end
+
+
+___''
+do
+  print("assert", F(pcall(assert, false)))
+  print("assert", F(pcall(assert, false, nil)))
+  print("assert", F(pcall(assert, false, "error msg")))
+  print("assert", F(pcall(assert, nil, {})))
+  print("assert", F(pcall(assert, 1, 2, 3)))
+end
+
 
 ___''
 do
@@ -235,6 +246,49 @@ print("math.ult", math.ult(-1, -2), math.ult(-2, -1))
 print("math.ult", pcall(math.ult, "x", 2))
 print("math.ult", pcall(math.ult, 1, 2.1))
 ___''
+
+
+if utf8.len then
+  local unpack = table.unpack or unpack
+  local function utf8rt(s)
+    local t = { utf8.codepoint(s, 1, #s) }
+    local ps, cs = {}, {}
+    for p,c in utf8.codes(s) do
+      ps[#ps+1], cs[#cs+1] = p, c
+    end
+    print("utf8.codes", unpack(ps))
+    print("utf8.codes", unpack(cs))
+    print("utf8.codepoint", unpack(t))
+    print("utf8.len", utf8.len(s), #t, #s)
+    print("utf8.char", utf8.char(unpack(t)))
+  end
+  utf8rt("äöüßÄÖÜ")
+  utf8rt("abcdefg")
+  ___''
+  local s = "äöüßÄÖÜ"
+  print("utf8.offset", utf8.offset(s, 1, 1))
+  print("utf8.offset", utf8.offset(s, 2, 1))
+  print("utf8.offset", utf8.offset(s, 3, 1))
+  print("utf8.offset", pcall(utf8.offset, s, 3, 2))
+  print("utf8.offset", utf8.offset(s, 3, 3))
+  print("utf8.offset", utf8.offset(s, -1, 7))
+  print("utf8.offset", utf8.offset(s, -2, 7))
+  print("utf8.offset", utf8.offset(s, -3, 7))
+  print("utf8.offset", utf8.offset(s, -1))
+  ___''
+else
+  print("XXX: utf8 module not available")
+end
+
+
+if string.pack then
+  local format = "bBhHlLjJdc3z"
+  local s = string.pack(format, -128, 255, -32768, 65535, -2147483648, 4294967295, -32768, 65536, 1.25, "abc", "defgh")
+  print("string.unpack", string.unpack(format, s))
+  ___''
+else
+  print("XXX: string packing not available")
+end
 
 
 print("testing Lua API for Lua 5.1 ...")
@@ -505,7 +559,7 @@ do
          return _tostring(v)
       end
    end
-   print("string.format()", string.format("%q", "\"\\\0000\0010\r0\n0\t0\""))
+   print("string.format()", string.format("%q", "\"\\\0000\0010\002\r\n0\t0\""))
    print("string.format()", string.format("%12.3fx%%sxx%.6s", 3.1, {}))
    print("string.format()", string.format("%-3f %%%s %%s", 3.1, true))
    print("string.format()", string.format("% 3.2g %%d %%%s", 3.1, nil))
@@ -529,15 +583,35 @@ end
 ___''
 do
    writefile("data.txt", "123 18.8 hello world\ni'm here\n")
-   for a,b in io.lines("test.lua", 2, "*l") do
+   io.input("data.txt")
+   print("io.read()", io.read("*n", "*number", "*l", "*a"))
+   io.input("data.txt")
+   print("io.read()", io.read("n", "number", "l", "a"))
+   io.input(io.stdin)
+   if mode ~= "module" then
+     local f = assert(io.open("data.txt", "r"))
+     print("file:read()", f:read("*n", "*number", "*l", "*a"))
+     f:close()
+     f = assert(io.open("data.txt", "r"))
+     print("file:read()", f:read("n", "number", "l", "a"))
+     f:close()
+   end
+   os.remove("data.txt")
+end
+
+
+___''
+do
+   writefile("data.txt", "123 18.8 hello world\ni'm here\n")
+   for a,b in io.lines(self, 2, "*l") do
       print("io.lines()", a, b)
       break
    end
-   for l in io.lines("test.lua") do
+   for l in io.lines(self) do
       print("io.lines()", l)
       break
    end
-   for n1,n2,rest in io.lines("data.txt", "*n", "*n", "*a") do
+   for n1,n2,rest in io.lines("data.txt", "*n", "n", "*a") do
       print("io.lines()", n1, n2, rest)
    end
    for l in io.lines("data.txt") do
@@ -550,14 +624,14 @@ do
       for l in io.lines("no_such_file.txt") do print(l) end
    end))
    if mode ~= "module" then
-     local f = assert(io.open("test.lua", "r"))
+     local f = assert(io.open(self, "r"))
      for a,b in f:lines(2, "*l") do
         print("file:lines()", a, b)
         break
      end
      f:close()
      f = assert(io.open("data.txt", "r"))
-     for n1,n2,rest in f:lines("*n", "*n", "*a") do
+     for n1,n2,rest in f:lines("*n", "n", "*a") do
         print("file:lines()", n1, n2, rest)
      end
      f:close()
@@ -583,122 +657,158 @@ ___''
 print("testing C API ...")
 local mod = require("testmod")
 ___''
-print(mod.isinteger(1))
-print(mod.isinteger(0))
-print(mod.isinteger(1234567))
-print(mod.isinteger(12.3))
-print(mod.isinteger(math.huge))
-print(mod.isinteger(math.sqrt(-1)))
+print("isinteger", mod.isinteger(1))
+print("isinteger", mod.isinteger(0))
+print("isinteger", mod.isinteger(1234567))
+print("isinteger", mod.isinteger(12.3))
+print("isinteger", mod.isinteger(math.huge))
+print("isinteger", mod.isinteger(math.sqrt(-1)))
 
 
 ___''
-print(mod.rotate(1, 1, 2, 3, 4, 5, 6))
-print(mod.rotate(-1, 1, 2, 3, 4, 5, 6))
-print(mod.rotate(4, 1, 2, 3, 4, 5, 6))
-print(mod.rotate(-4, 1, 2, 3, 4, 5, 6))
+print("rotate", mod.rotate(1, 1, 2, 3, 4, 5, 6))
+print("rotate", mod.rotate(-1, 1, 2, 3, 4, 5, 6))
+print("rotate", mod.rotate(4, 1, 2, 3, 4, 5, 6))
+print("rotate", mod.rotate(-4, 1, 2, 3, 4, 5, 6))
 
 
 ___''
-print(mod.strtonum("+123"))
-print(mod.strtonum(" 123 "))
-print(mod.strtonum("-1.23"))
-print(mod.strtonum(" 123 abc"))
-print(mod.strtonum("jkl"))
+print("strtonum", mod.strtonum("+123"))
+print("strtonum", mod.strtonum(" 123 "))
+print("strtonum", mod.strtonum("-1.23"))
+print("strtonum", mod.strtonum(" 123 abc"))
+print("strtonum", mod.strtonum("jkl"))
 
 
 ___''
 local a, b, c = mod.requiref()
-print( type(a), type(b), type(c),
-       a.boolean, b.boolean, c.boolean,
-       type(requiref1), type(requiref2), type(requiref3))
+print("requiref", type(a), type(b), type(c),
+      a.boolean, b.boolean, c.boolean,
+      type(requiref1), type(requiref2), type(requiref3))
 
 ___''
 local proxy, backend = {}, {}
 setmetatable(proxy, { __index = backend, __newindex = backend })
-print(rawget(proxy, 1), rawget(backend, 1))
-print(mod.getseti(proxy, 1))
-print(rawget(proxy, 1), rawget(backend, 1))
-print(mod.getseti(proxy, 1))
-print(rawget(proxy, 1), rawget(backend, 1))
+print("geti/seti", rawget(proxy, 1), rawget(backend, 1))
+print("geti/seti", mod.getseti(proxy, 1))
+print("geti/seti", rawget(proxy, 1), rawget(backend, 1))
+print("geti/seti", mod.getseti(proxy, 1))
+print("geti/seti", rawget(proxy, 1), rawget(backend, 1))
 
 -- tests for Lua 5.1
 ___''
-print(mod.tonumber(12))
-print(mod.tonumber("12"))
-print(mod.tonumber("0"))
-print(mod.tonumber(false))
-print(mod.tonumber("error"))
+print("tonumber", mod.tonumber(12))
+print("tonumber", mod.tonumber("12"))
+print("tonumber", mod.tonumber("0"))
+print("tonumber", mod.tonumber(false))
+print("tonumber", mod.tonumber("error"))
 
 ___''
-print(mod.tointeger(12))
-print(mod.tointeger("12"))
-print(mod.tointeger("0"))
-print( "aaa" )
-print(mod.tointeger(math.pi))
-print( "bbb" )
-print(mod.tointeger(false))
-print(mod.tointeger("error"))
+print("tointeger", mod.tointeger(12))
+print("tointeger", mod.tointeger("12"))
+print("tointeger", mod.tointeger("0"))
+print("tointeger", mod.tointeger(math.pi))
+print("tointeger", mod.tointeger(false))
+print("tointeger", mod.tointeger("error"))
 
 ___''
-print(mod.len("123"))
-print(mod.len({ 1, 2, 3}))
-print(pcall(mod.len, true))
+print("len", mod.len("123"))
+print("len", mod.len({ 1, 2, 3}))
+print("len", pcall(mod.len, true))
 local ud, meta = mod.newproxy()
 meta.__len = function() return 5 end
-print(mod.len(ud))
+print("len", mod.len(ud))
 meta.__len = function() return true end
-print(pcall(mod.len, ud))
+print("len", pcall(mod.len, ud))
 
 ___''
-print(mod.copy(true, "string", {}, 1))
+print("copy", mod.copy(true, "string", {}, 1))
 
 ___''
-print(mod.rawxetp())
-print(mod.rawxetp("I'm back"))
+print("rawgetp/rawsetp", mod.rawxetp())
+print("rawgetp/rawsetp", mod.rawxetp("I'm back"))
 
 ___''
-print(F(mod.globals()), mod.globals() == _G)
+print("globals", F(mod.globals()), mod.globals() == _G)
 
 ___''
 local t = {}
-print(F(mod.subtable(t)))
+print("getsubtable", F(mod.subtable(t)))
 local x, msg = mod.subtable(t)
-print(F(x, msg, x == t.xxx))
+print("getsubtable", F(x, msg, x == t.xxx))
 
 ___''
-print(F(mod.udata()))
-print(mod.udata("nosuchtype"))
+print("udata", F(mod.udata()))
+print("udata", mod.udata("nosuchtype"))
 
 ___''
-print(F(mod.uservalue()))
+print("uservalue", F(mod.uservalue()))
 
 ___''
-print(mod.getupvalues())
+print("upvalues", mod.getupvalues())
 
 ___''
-print(mod.absindex("hi", true))
+print("absindex", mod.absindex("hi", true))
 
 ___''
-print(mod.arith(2, 1))
-print(mod.arith(3, 5))
+print("arith", mod.arith(2, 1))
+print("arith", mod.arith(3, 5))
 
 ___''
-print(mod.compare(1, 1))
-print(mod.compare(2, 1))
-print(mod.compare(1, 2))
+print("compare", mod.compare(1, 1))
+print("compare", mod.compare(2, 1))
+print("compare", mod.compare(1, 2))
 
 ___''
-print(mod.tolstring("string"))
+print("tolstring", mod.tolstring("string"))
 local t = setmetatable({}, {
   __tostring = function(v) return "mytable" end
 })
-print(mod.tolstring(t))
+print("tolstring", mod.tolstring(t))
 local t = setmetatable({}, {
   __tostring = function(v) return nil end
 })
-print(pcall(mod.tolstring, t))
+print("tolstring", pcall(mod.tolstring, t))
+local ud, meta = mod.newproxy()
+meta.__name = "XXX"
+print("tolstring", mod.tolstring(ud):gsub(":.*$", ": yyy"))
 
 ___''
-print(mod.buffer())
+print("pushstring", mod.pushstring())
+
+___''
+print("Buffer", mod.buffer())
+
+___''
+print("execresult", mod.exec("exit 0"))
+print("execresult", mod.exec("exit 1"))
+print("execresult", mod.exec("exit 25"))
+
+___''
+do
+  local bin = string.dump(function() end)
+  local modes = { "t", "b", "bt" }
+  local codes = {
+    "", "return true", bin, "invalidsource", "\27invalidbinary"
+  }
+  for _,m in ipairs(modes) do
+    for i,c in ipairs(codes) do
+      print("loadbufferx", m, i, F(mod.loadstring(c, m)))
+    end
+  end
+
+  ___''
+  local bom = "\239\187\191"
+  local shebang = "#!/usr/bin/env lua\n"
+  codes[#codes+1] = bom .. shebang .. "return true"
+  codes[#codes+1] = bom .. shebang .. bin
+  codes[#codes+1] = bom .. shebang .. "invalidsource"
+  codes[#codes+1] = bom .. shebang .. "\027invalidbinary"
+  for _,m in ipairs(modes) do
+    for i,c in ipairs(codes) do
+      print("loadfilex", m, i, F(mod.loadfile(c, m)))
+    end
+  end
+end
 ___''
 
