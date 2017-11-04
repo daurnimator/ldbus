@@ -274,7 +274,7 @@ static void wakeup_main_function(void *data) {
 	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
 	lua_getuservalue(L, -1);
 	lua_remove(L, top + 1); /* remove userdata */
-	lua_rawgeti(L, -1, 1); /* index 1 = function */
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_FUNC);
 	lua_remove(L, top + 1); /* remove uservalue table */
 	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
 		/* unhandled error */
@@ -290,9 +290,9 @@ static int ldbus_connection_set_wakeup_main_function(lua_State *L) {
 	*data = L;
 	lua_createtable(L, 2, 0);
 	lua_pushvalue(L, 2);
-	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_FUNC);
 	lua_pushthread(L);
-	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_THREAD);
 	lua_setuservalue(L, -2);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	dbus_connection_set_wakeup_main_function(connection, wakeup_main_function, data, free_data_function);
@@ -307,7 +307,7 @@ static void dispatch_status_function(DBusConnection *connection, DBusDispatchSta
 	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
 	lua_getuservalue(L, -1);
 	lua_remove(L, top + 1); /* remove userdata */
-	lua_rawgeti(L, -1, 1); /* index 1 = function */
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_FUNC);
 	lua_remove(L, top + 1); /* remove uservalue table */
 	lua_pushstring(L, DispatchStatus_lst[new_status]); /* XXX: could fail */
 	if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
@@ -324,9 +324,9 @@ static int ldbus_connection_set_dispatch_status_function(lua_State *L) {
 	*data = L;
 	lua_createtable(L, 2, 0);
 	lua_pushvalue(L, 2);
-	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_FUNC);
 	lua_pushthread(L);
-	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_THREAD);
 	lua_setuservalue(L, -2);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	dbus_connection_set_dispatch_status_function(connection, dispatch_status_function, data, free_data_function);
@@ -401,7 +401,7 @@ static DBusHandlerResult message_function(DBusConnection *connection, DBusMessag
 	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
 	lua_getuservalue(L, -1);
 	lua_remove(L, top + 1); /* remove userdata */
-	lua_rawgeti(L, -1, 1); /* index 1 = function */
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_FUNC);
 	lua_remove(L, top + 1); /* remove uservalue table */
 	dbus_message_ref(message); /* Keep a reference for lua */
 	push_DBusMessage(L, message); /* XXX: Could throw? */
@@ -436,9 +436,9 @@ static int ldbus_connection_register_object_path(lua_State *L) {
 	*data = L;
 	lua_createtable(L, 2, 0);
 	lua_pushvalue(L, 3);
-	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_FUNC);
 	lua_pushthread(L);
-	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_THREAD);
 	lua_setuservalue(L, -2);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	if (!dbus_connection_register_object_path(connection, path, &VTable, data)) {
@@ -458,9 +458,9 @@ static int ldbus_connection_register_fallback(lua_State *L) {
 	*data = L;
 	lua_createtable(L, 2, 0);
 	lua_pushvalue(L, 3);
-	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_FUNC);
 	lua_pushthread(L);
-	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_THREAD);
 	lua_setuservalue(L, -2);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	if (!dbus_connection_register_fallback(connection, path, &VTable, data)) {

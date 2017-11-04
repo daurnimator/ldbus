@@ -28,7 +28,7 @@ static void pending_notify_function(DBusPendingCall *pending, void *data) {
 	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
 	lua_getuservalue(L, -1);
 	lua_remove(L, top + 1); /* remove userdata */
-	lua_rawgeti(L, -1, 1); /* index 1 = function */
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_FUNC);
 	lua_remove(L, top + 1); /* remove uservalue table */
 	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
 		/* unhandled error */
@@ -50,9 +50,9 @@ static int ldbus_pending_call_set_notify(lua_State *L) {
 	*data = L;
 	lua_createtable(L, 2, 0);
 	lua_pushvalue(L, 2);
-	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_FUNC);
 	lua_pushthread(L);
-	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_THREAD);
 	lua_setuservalue(L, -2);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	if (!dbus_pending_call_set_notify(pending, pending_notify_function, data, free_data_function)) {

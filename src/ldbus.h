@@ -14,9 +14,12 @@ typedef struct {
 } ldbus_callback_udata;
 
 enum ldbus_callback_indexes {
-	DBUS_LUA_FUNC_ADD,
-	DBUS_LUA_FUNC_REMOVE,
-	DBUS_LUA_FUNC_TOGGLE
+	DBUS_LUA_FUNC_FUNC = 1,
+	DBUS_LUA_FUNC_THREAD = 2,
+	/* for watch and timeout */
+	DBUS_LUA_FUNC_ADD = 1,
+	DBUS_LUA_FUNC_REMOVE = 3,
+	DBUS_LUA_FUNC_TOGGLE = 4
 };
 
 LDBUS_INTERNAL int tostring(lua_State *);
