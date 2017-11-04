@@ -7,12 +7,6 @@
 #define LDBUS_INTERNAL __attribute__ ((visibility ("internal")))
 #define LDBUS_NO_MEMORY "no memory"
 
-typedef struct {
-	lua_State* L;
-	int Lref;
-	int ref;
-} ldbus_callback_udata;
-
 enum ldbus_callback_indexes {
 	DBUS_LUA_FUNC_FUNC = 1,
 	DBUS_LUA_FUNC_THREAD = 2,
