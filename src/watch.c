@@ -64,83 +64,83 @@ LDBUS_INTERNAL void push_DBusWatch(lua_State *L, DBusWatch *watch) {
 }
 
 LDBUS_INTERNAL dbus_bool_t ldbus_watch_add_function(DBusWatch *watch, void *data) {
-	lua_State *L = ((ldbus_watch_udata*)data)->L;
-	int ref = ((ldbus_watch_udata*)data)->ref;
-
-	if (!lua_checkstack(L, 4)) return FALSE;
-
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
+	if (!lua_checkstack(L, 2)) return FALSE;
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 1); /* remove userdata */
 	lua_rawgeti(L, -1, DBUS_LUA_FUNC_ADD);
-
-	push_DBusWatch(L, watch);
+	lua_remove(L, top + 1); /* remove uservalue table */
+	push_DBusWatch(L, watch); /* XXX: could throw */
 	/* Save DBusWatch in registry */
 	lua_pushvalue(L, -1);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, watch);
-
-	return lua_pcall(L, 1, 0, 0) != LUA_ERRMEM;
+	switch(lua_pcall(L, 1, 0, 0)) {
+	case LUA_OK:
+		return TRUE;
+	case LUA_ERRMEM:
+		lua_pop(L, 1);
+		return FALSE;
+	default:
+		/* unhandled error */
+		lua_pop(L, 1);
+		return TRUE;
+	}
 }
 
 LDBUS_INTERNAL void ldbus_watch_remove_function(DBusWatch *watch, void *data) {
-	lua_State *L = ((ldbus_watch_udata*)data)->L;
-	int ref = ((ldbus_watch_udata*)data)->ref;
-
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
 	DBusWatch **udata;
 
-	/* Lookup remove callback from ref in `data` */
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-	lua_rawgeti(L, -1, DBUS_LUA_FUNC_REMOVE);
-
-	/* Grab watch from registry */
-	/* this way we can't throw an error */
+	/* Grab added watch from registry */
+	/* We need to keep a reference to userdata around so we can invalidate it */
 	lua_rawgetp(L, LUA_REGISTRYINDEX, watch);
-	/* We need to keep a copy of userdata around so we can invalidate it */
-	lua_pushvalue(L, -1);
-	/* Replace the callback table at a higher stack slot with this function.
-	   Has to be below the function to we have it after the pcall */
-	lua_replace(L, -4);
-
 	/* Delete from registry */
-	/* setting `nil` can't error (undocumented) */
 	lua_pushnil(L);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, watch);
 
-	/* Call the callback, with looked-up watch as argument */
-	lua_pcall(L, 1, 0, 0);
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 2); /* remove userdata */
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_REMOVE);
+	lua_remove(L, top + 2); /* remove uservalue table */
+	lua_pushvalue(L, top + 1); /* push watch as argument */
+	if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+		/* unhandled error */
+	}
 
 	/* Invalidate watch object */
-	udata = lua_touserdata(L, -1);
+	udata = lua_touserdata(L, top+1);
 	if (udata != NULL) {
 		*udata = NULL;
 	}
 
+	lua_settop(L, top);
 	return;
 }
 
 LDBUS_INTERNAL void ldbus_watch_toggled_function(DBusWatch *watch, void *data) {
-	lua_State *L = ((ldbus_watch_udata*)data)->L;
-	int ref = ((ldbus_watch_udata*)data)->ref;
-
-	/* Lookup remove callback from ref in `data` */
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 1); /* remove userdata */
 	lua_rawgeti(L, -1, DBUS_LUA_FUNC_TOGGLE);
-	/* Remove callback table from stack */
-	lua_remove(L, lua_gettop(L)-1);
-
-	/* Grab watch from registry */
-	/* this way we can't throw an error */
-	lua_rawgetp(L, LUA_REGISTRYINDEX, watch);
-
-	/* Call the callback, with looked-up watch as argument */
-	lua_pcall(L, 1, 0, 0);
+	lua_remove(L, top + 1); /* remove uservalue table */
+	lua_rawgetp(L, LUA_REGISTRYINDEX, watch); /* grab added watch from registry */
+	if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+		/* unhandled error */
+		lua_pop(L, 1);
+	}
 	return;
 }
 
 LDBUS_INTERNAL void ldbus_watch_free_data_function(void *data) {
-	lua_State *L = ((ldbus_watch_udata*)data)->L;
-	int ref = ((ldbus_watch_udata*)data)->ref;
-
-	luaL_unref(L, LUA_REGISTRYINDEX, ref);
-	free(data);
+	lua_State *L = *(lua_State**)data;
+	lua_pushnil(L);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 }
 
 int luaopen_ldbus_watch(lua_State *L) {
