@@ -224,35 +224,31 @@ static int ldbus_connection_set_watch_functions(lua_State *L) {
 }
 
 static int ldbus_connection_set_timeout_functions(lua_State *L) {
-	ldbus_timeout_udata *data;
-
+	lua_State **data;
 	DBusConnection *connection = check_DBusConnection(L, 1);
-	int Lref = LUA_NOREF;
-	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
-		Lref = luaL_ref(L, -1);
-	}
-	lua_settop(L, 4);
-	/* Place a table below the 3 callback argument */
-	lua_createtable(L, 0, 3);
-	lua_insert(L, 2);
-	/* Insert in reverse order */
-	lua_rawseti(L, 2, DBUS_LUA_FUNC_TOGGLE);
-	lua_rawseti(L, 2, DBUS_LUA_FUNC_REMOVE);
-	lua_rawseti(L, 2, DBUS_LUA_FUNC_ADD);
 
 	/* make sure ldbus.watch has been loaded */
 	luaL_requiref(L, "ldbus.timeout", lua_open_ldbus_timeout, FALSE);
 	lua_pop(L, 1);
 
-	if ((data = malloc(sizeof(ldbus_timeout_udata))) == NULL) return luaL_error(L, LDBUS_NO_MEMORY);
-	data->L = L;
-	data->Lref = Lref;
-	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	data = lua_newuserdata(L, sizeof(lua_State*));
+	*data = L;
+	lua_createtable(L, 4, 0);
+	lua_pushvalue(L, 2);
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_ADD);
+	lua_pushvalue(L, 3);
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_REMOVE);
+	lua_pushvalue(L, 4);
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_TOGGLE);
+	lua_pushthread(L);
+	lua_rawseti(L, -2, DBUS_LUA_FUNC_THREAD);
+	lua_setuservalue(L, -2);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 
 	if (!dbus_connection_set_timeout_functions(connection,
 			ldbus_timeout_add_function, ldbus_timeout_remove_function, ldbus_timeout_toggled_function,
 			(void *)data, ldbus_timeout_free_data_function)) {
-		free(data);
+		ldbus_timeout_free_data_function(data);
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	};
 	lua_pushboolean(L, TRUE);

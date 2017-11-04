@@ -46,83 +46,83 @@ LDBUS_INTERNAL void push_DBusTimeout(lua_State *L, DBusTimeout *timeout) {
 }
 
 LDBUS_INTERNAL dbus_bool_t ldbus_timeout_add_function(DBusTimeout *timeout, void *data) {
-	lua_State *L = ((ldbus_timeout_udata*)data)->L;
-	int ref = ((ldbus_timeout_udata*)data)->ref;
-
-	if (!lua_checkstack(L, 4)) return FALSE;
-
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
+	if (!lua_checkstack(L, 2)) return FALSE;
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 1); /* remove userdata */
 	lua_rawgeti(L, -1, DBUS_LUA_FUNC_ADD);
-
-	push_DBusTimeout(L, timeout);
+	lua_remove(L, top + 1); /* remove uservalue table */
+	push_DBusTimeout(L, timeout); /* XXX: could throw */
 	/* Save DBusTimeout in registry */
 	lua_pushvalue(L, -1);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, timeout);
-
-	return lua_pcall(L, 1, 0, 0) != LUA_ERRMEM;
+	switch(lua_pcall(L, 1, 0, 0)) {
+	case LUA_OK:
+		return TRUE;
+	case LUA_ERRMEM:
+		lua_pop(L, 1);
+		return FALSE;
+	default:
+		/* unhandled error */
+		lua_pop(L, 1);
+		return TRUE;
+	}
 }
 
 LDBUS_INTERNAL void ldbus_timeout_remove_function(DBusTimeout *timeout, void *data) {
-	lua_State *L = ((ldbus_timeout_udata*)data)->L;
-	int ref = ((ldbus_timeout_udata*)data)->ref;
-
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
 	DBusTimeout **udata;
 
-	/* Lookup remove callback from ref in `data` */
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-	lua_rawgeti(L, -1, DBUS_LUA_FUNC_REMOVE);
-
-	/* Grab timeout from registry */
-	/* this way we can't throw an error */
+	/* Grab added timeout from registry */
+	/* We need to keep a reference to userdata around so we can invalidate it */
 	lua_rawgetp(L, LUA_REGISTRYINDEX, timeout);
-	/* We need to keep a copy of userdata around so we can invalidate it */
-	lua_pushvalue(L, -1);
-	/* Replace the callback table at a higher stack slot with this function.
-	   Has to be below the function to we have it after the pcall */
-	lua_replace(L, -4);
-
 	/* Delete from registry */
-	/* setting `nil` can't error (undocumented) */
 	lua_pushnil(L);
 	lua_rawsetp(L, LUA_REGISTRYINDEX, timeout);
 
-	/* Call the callback, with looked-up timeout as argument */
-	lua_pcall(L, 1, 0, 0);
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 2); /* remove userdata */
+	lua_rawgeti(L, -1, DBUS_LUA_FUNC_REMOVE);
+	lua_remove(L, top + 2); /* remove uservalue table */
+	lua_pushvalue(L, top + 1); /* push timeout as argument */
+	if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+		/* unhandled error */
+	}
 
 	/* Invalidate timeout object */
-	udata = lua_touserdata(L, -1);
+	udata = lua_touserdata(L, top+1);
 	if (udata != NULL) {
 		*udata = NULL;
 	}
 
+	lua_settop(L, top);
 	return;
 }
 
 LDBUS_INTERNAL void ldbus_timeout_toggled_function(DBusTimeout *timeout, void *data) {
-	lua_State *L = ((ldbus_timeout_udata*)data)->L;
-	int ref = ((ldbus_timeout_udata*)data)->ref;
-
-	/* Lookup remove callback from ref in `data` */
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 1); /* remove userdata */
 	lua_rawgeti(L, -1, DBUS_LUA_FUNC_TOGGLE);
-	/* Remove callback table from stack */
-	lua_remove(L, lua_gettop(L)-1);
-
-	/* Grab timeout from registry */
-	/* this way we can't throw an error */
-	lua_rawgetp(L, LUA_REGISTRYINDEX, timeout);
-
-	/* Call the callback, with looked-up timeout as argument */
-	lua_pcall(L, 1, 0, 0);
+	lua_remove(L, top + 1); /* remove uservalue table */
+	lua_rawgetp(L, LUA_REGISTRYINDEX, timeout); /* grab added timeout from registry */
+	if (lua_pcall(L, 1, 0, 0) != LUA_OK) {
+		/* unhandled error */
+		lua_pop(L, 1);
+	}
 	return;
 }
 
 LDBUS_INTERNAL void ldbus_timeout_free_data_function(void *data) {
-	lua_State *L = ((ldbus_timeout_udata*)data)->L;
-	int ref = ((ldbus_timeout_udata*)data)->ref;
-
-	luaL_unref(L, LUA_REGISTRYINDEX, ref);
-	free(data);
+	lua_State *L = *(lua_State**)data;
+	lua_pushnil(L);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 }
 
 int lua_open_ldbus_timeout(lua_State *L) {

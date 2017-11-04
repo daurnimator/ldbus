@@ -12,8 +12,6 @@
 
 #define check_DBusTimeout(L, arg) (*(DBusTimeout **)luaL_checkudata((L), (arg), DBUS_TIMEOUT_METATABLE))
 
-typedef ldbus_callback_udata ldbus_timeout_udata;
-
 LDBUS_INTERNAL void push_DBusTimeout(lua_State *L, DBusTimeout *timeout);
 LDBUS_INTERNAL dbus_bool_t ldbus_timeout_add_function(DBusTimeout *timeout, void *data);
 LDBUS_INTERNAL void ldbus_timeout_remove_function(DBusTimeout *timeout, void *data);
