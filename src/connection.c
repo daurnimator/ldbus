@@ -378,25 +378,26 @@ static int ldbus_connection_has_messages_to_send(lua_State *L) {
 }
 
 static void unregister_function(DBusConnection *connection, void *data) {
-	lua_State *L = ((ldbus_callback_udata*)data)->L;
-	int Lref = ((ldbus_callback_udata*)data)->Lref;
-	int ref = ((ldbus_callback_udata*)data)->ref;
+	lua_State *L = *(lua_State**)data;
 	UNUSED(connection);
-	luaL_unref(L, LUA_REGISTRYINDEX, ref);
-	luaL_unref(L, LUA_REGISTRYINDEX, Lref);
-	free(data);
+	lua_pushnil(L);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 }
 
 static DBusHandlerResult message_function(DBusConnection *connection, DBusMessage *message, void *data) {
-	lua_State *L = ((ldbus_callback_udata*)data)->L;
-	int ref = ((ldbus_callback_udata*)data)->ref;
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
 	UNUSED(connection);
 	if (!lua_checkstack(L, 2)) {
 		return DBUS_HANDLER_RESULT_NEED_MEMORY;
 	}
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 1); /* remove userdata */
+	lua_rawgeti(L, -1, 1); /* index 1 = function */
+	lua_remove(L, top + 1); /* remove uservalue table */
 	dbus_message_ref(message); /* Keep a reference for lua */
-	push_DBusMessage(L, message);
+	push_DBusMessage(L, message); /* XXX: Could throw? */
 	switch(lua_pcall(L, 1, 1, 0)) {
 		case LUA_OK:
 			if (lua_toboolean(L, -1)) {
@@ -405,8 +406,10 @@ static DBusHandlerResult message_function(DBusConnection *connection, DBusMessag
 				return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 			}
 		case LUA_ERRMEM:
+			lua_pop(L, 1);
 			return DBUS_HANDLER_RESULT_NEED_MEMORY;
 		default:
+			lua_pop(L, 1);
 			return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 	}
 }
@@ -420,21 +423,19 @@ static const DBusObjectPathVTable VTable = {
 static int ldbus_connection_register_object_path(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
-	ldbus_callback_udata *data;
+	lua_State **data;
 	luaL_checktype(L, 3, LUA_TFUNCTION);
-	int Lref = LUA_NOREF;
-	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
-		Lref = luaL_ref(L, -1);
-	}
-	lua_settop(L, 3);
-	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
-		return luaL_error(L, LDBUS_NO_MEMORY);
-	}
-	data->L = L;
-	data->Lref = Lref;
-	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	data = lua_newuserdata(L, sizeof(lua_State*));
+	*data = L;
+	lua_createtable(L, 2, 0);
+	lua_pushvalue(L, 3);
+	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_pushthread(L);
+	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_setuservalue(L, -2);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	if (!dbus_connection_register_object_path(connection, path, &VTable, data)) {
-		free(data);
+		unregister_function(connection, data);
 		return luaL_error(L, "unknown error");
 	}
 	lua_pushboolean(L, 1);
@@ -444,21 +445,19 @@ static int ldbus_connection_register_object_path(lua_State *L) {
 static int ldbus_connection_register_fallback(lua_State *L) {
 	DBusConnection *connection = check_DBusConnection(L, 1);
 	const char *path = luaL_checkstring(L, 2);
-	ldbus_callback_udata *data;
+	lua_State **data;
 	luaL_checktype(L, 3, LUA_TFUNCTION);
-	int Lref = LUA_NOREF;
-	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
-		Lref = luaL_ref(L, -1);
-	}
-	lua_settop(L, 3);
-	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
-		return luaL_error(L, LDBUS_NO_MEMORY);
-	}
-	data->L = L;
-	data->Lref = Lref;
-	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	data = lua_newuserdata(L, sizeof(lua_State*));
+	*data = L;
+	lua_createtable(L, 2, 0);
+	lua_pushvalue(L, 3);
+	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_pushthread(L);
+	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_setuservalue(L, -2);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	if (!dbus_connection_register_fallback(connection, path, &VTable, data)) {
-		free(data);
+		unregister_function(connection, data);
 		return luaL_error(L, "unknown error");
 	}
 	lua_pushboolean(L, 1);
