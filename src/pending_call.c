@@ -22,38 +22,41 @@ static int ldbus_pending_call_unref(lua_State *L) {
 }
 
 static void pending_notify_function(DBusPendingCall *pending, void *data) {
-	lua_State *L = ((ldbus_callback_udata*)data)->L;
-	int ref = ((ldbus_callback_udata*)data)->ref;
+	lua_State *L = *(lua_State**)data;
+	int top = lua_gettop(L);
 	UNUSED(pending);
-	lua_rawgeti(L, LUA_REGISTRYINDEX, ref);
-	lua_pcall(L, 0, 0, 0);
+	lua_rawgetp(L, LUA_REGISTRYINDEX, data);
+	lua_getuservalue(L, -1);
+	lua_remove(L, top + 1); /* remove userdata */
+	lua_rawgeti(L, -1, 1); /* index 1 = function */
+	lua_remove(L, top + 1); /* remove uservalue table */
+	if (lua_pcall(L, 0, 0, 0) != LUA_OK) {
+		/* unhandled error */
+		lua_pop(L, 1);
+	}
 }
 
 static void free_data_function(void *data) {
-	lua_State *L = ((ldbus_callback_udata*)data)->L;
-	int Lref = ((ldbus_callback_udata*)data)->Lref;
-	int ref = ((ldbus_callback_udata*)data)->ref;
-	luaL_unref(L, LUA_REGISTRYINDEX, ref);
-	luaL_unref(L, LUA_REGISTRYINDEX, Lref);
-	free(data);
+	lua_State *L = *(lua_State**)data;
+	lua_pushnil(L);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 }
 
 static int ldbus_pending_call_set_notify(lua_State *L) {
 	DBusPendingCall* pending = checkPendingCall(L, 1);
-	ldbus_callback_udata *data;
-	int Lref = LUA_NOREF;
+	lua_State **data;
 	luaL_checktype(L, 2, LUA_TFUNCTION);
-	if (lua_pushthread(L) != 1) { /* don't need to track main thread */
-		Lref = luaL_ref(L, -1);
-	}
-	lua_settop(L, 2);
-	if ((data = malloc(sizeof(ldbus_callback_udata))) == NULL) {
-		return luaL_error(L, LDBUS_NO_MEMORY);
-	}
-	data->L = L;
-	data->Lref = Lref;
-	data->ref = luaL_ref(L, LUA_REGISTRYINDEX);
+	data = lua_newuserdata(L, sizeof(lua_State*));
+	*data = L;
+	lua_createtable(L, 2, 0);
+	lua_pushvalue(L, 2);
+	lua_rawseti(L, -2, 1); /* index 1 = function */
+	lua_pushthread(L);
+	lua_rawseti(L, -2, 2); /* index 2 = thread */
+	lua_setuservalue(L, -2);
+	lua_rawsetp(L, LUA_REGISTRYINDEX, data);
 	if (!dbus_pending_call_set_notify(pending, pending_notify_function, data, free_data_function)) {
+		free_data_function(data);
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
 	lua_pushboolean(L, 1);
