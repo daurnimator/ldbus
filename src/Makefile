@@ -1,5 +1,5 @@
-LUA_LIBDIR = /usr/local/lib/lua/5.3
-PKG_CONFIG = pkg-config
+LUA_LIBDIR ?= /usr/local/lib/lua/5.3
+PKG_CONFIG ?= pkg-config
 
 CFLAGS += -Wall -Wextra --pedantic -Wno-long-long
 CFLAGS += `$(PKG_CONFIG) --cflags lua5.3 dbus-1`
@@ -19,5 +19,5 @@ clean:
 	rm -f -- ldbus.so $(OBJS)
 
 install: ldbus.so
-	mkdir -p $(LUA_LIBDIR)
-	cp ldbus.so $(LUA_LIBDIR)
+	mkdir -p $(DESTDIR)$(LUA_LIBDIR)
+	cp ldbus.so $(DESTDIR)$(LUA_LIBDIR)
