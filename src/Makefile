@@ -1,8 +1,9 @@
 LUA_LIBDIR = /usr/local/lib/lua/5.3
 PKG_CONFIG = pkg-config
+LUA_PKGNAME = lua5.3
 
 CFLAGS += -Wall -Wextra --pedantic -Wno-long-long
-CFLAGS += `$(PKG_CONFIG) --cflags lua5.3 dbus-1`
+CFLAGS += `$(PKG_CONFIG) --cflags $(LUA_PKGNAME) dbus-1`
 CFLAGS += -fPIC
 CFLAGS += -I ../vendor/compat-5.3/c-api
 
