@@ -14,7 +14,7 @@ OBJS = ldbus.o error.o pending_call.o connection.o bus.o message.o message_iter.
 all:	ldbus.so
 
 ldbus.so: $(OBJS)
-	$(CC) -o ldbus.so -shared $(CFLAGS) $^ $(LIBS)
+	$(CC) -o ldbus.so -shared $(CFLAGS) $(LDFLAGS) $^ $(LIBS)
 
 clean:
 	rm -f -- ldbus.so $(OBJS)
