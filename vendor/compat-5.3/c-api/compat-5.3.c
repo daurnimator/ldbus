@@ -37,7 +37,7 @@
 #endif /* strerror_r */
 
 #ifndef COMPAT53_HAVE_STRERROR_S
-#  if defined(_MSC_VER) || (defined(__STDC_VERSION__) && __STDC_VERSION__ >= 201112L) || \
+#  if defined(_MSC_VER) || \
       (defined(__STDC_LIB_EXT1__) && __STDC_LIB_EXT1__)
 #    define COMPAT53_HAVE_STRERROR_S 1
 #  else /* not VC++ or C11 */
