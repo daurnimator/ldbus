@@ -13,12 +13,27 @@
 #include "message_iter.h"
 
 
+LDBUS_INTERNAL int unref_dbus_message_iter(lua_State *L) {
+	lDBusMessageIter *iter = luaL_checkudata(L, -1, DBUS_MESSAGE_ITER_METATABLE);
+
+	if (iter->message) {
+		dbus_message_unref(iter->message);
+	}
+
+	return 0;
+}
+
 static int ldbus_message_iter_clone(lua_State *L) {
-	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
-	DBusMessageIter *clone;
+	lDBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
+	lDBusMessageIter *clone;
 	push_DBusMessageIter(L);
 	clone = lua_touserdata(L, -1);
-	memcpy(clone, iter, sizeof(DBusMessageIter));
+	memcpy(clone, iter, sizeof(lDBusMessageIter));
+
+	if (clone->message) {
+		dbus_message_ref(clone->message);
+	}
+
 	return 1;
 }
 
@@ -65,16 +80,21 @@ static int ldbus_message_iter_get_element_type(lua_State *L) {
 }
 
 static int ldbus_message_iter_recurse(lua_State *L) {
-	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
-	DBusMessageIter *sub;
+	lDBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
+	lDBusMessageIter *sub;
 	if (lua_gettop(L) == 1) {
 		push_DBusMessageIter(L);
 	} else {
 		lua_settop(L, 2);
+
+		/* remove possible reference to previously referred message */
+		unref_dbus_message_iter(L);
 	}
 	sub = luaL_checkudata(L, 2, DBUS_MESSAGE_ITER_METATABLE);
 
-	dbus_message_iter_recurse(iter, sub);
+	dbus_message_iter_recurse(&iter->iter, &sub->iter);
+	sub->message = iter->message;
+	dbus_message_ref(sub->message);
 
 	return 1;
 }
@@ -286,10 +306,10 @@ static int ldbus_message_iter_append_basic(lua_State *L) {
 }
 
 static int ldbus_message_iter_open_container(lua_State *L) {
-	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
+	lDBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
 	int argtype;
 	const char *contained_signature;
-	DBusMessageIter *sub;
+	lDBusMessageIter *sub;
 	if (lua_type(L, 2) != LUA_TSTRING || lua_rawlen(L, 2) != 1) {
 		return luaL_argerror(L, 2, lua_pushfstring(L, "character expected, got %s", luaL_typename(L, 2)));
 	}
@@ -299,12 +319,18 @@ static int ldbus_message_iter_open_container(lua_State *L) {
 		push_DBusMessageIter(L);
 	} else {
 		lua_settop(L, 4);
+
+		/* remove possible reference to previously referred message */
+		unref_dbus_message_iter(L);
 	}
 	sub = luaL_checkudata(L, -1, DBUS_MESSAGE_ITER_METATABLE);
 
-	if (!dbus_message_iter_open_container(iter, argtype, contained_signature, sub)) {
+	if (!dbus_message_iter_open_container(&iter->iter, argtype, contained_signature, &sub->iter)) {
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
+
+	sub->message = iter->message;
+	dbus_message_ref(sub->message);
 
 	return 1;
 }
@@ -334,7 +360,8 @@ LDBUS_INTERNAL int push_DBusMessageIter(lua_State *L) {
 		{ NULL, NULL }
 	};
 
-	lua_newuserdata(L, sizeof(DBusMessageIter));
+	lDBusMessageIter *iter = lua_newuserdata(L, sizeof(lDBusMessageIter));
+	iter->message = NULL;
 
 	if (luaL_newmetatable(L, DBUS_MESSAGE_ITER_METATABLE)) {
 		luaL_newlib(L, methods);
@@ -342,6 +369,9 @@ LDBUS_INTERNAL int push_DBusMessageIter(lua_State *L) {
 
 		lua_pushcfunction(L, tostring);
 		lua_setfield(L, -2, "__tostring");
+
+		lua_pushcfunction(L, unref_dbus_message_iter);
+		lua_setfield(L, -2, "__gc");
 
 		lua_pushstring(L, "DBusMessageIter");
 		lua_setfield(L, -2, "__udtype");
