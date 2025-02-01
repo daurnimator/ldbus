@@ -134,16 +134,22 @@ static int ldbus_message_get_type(lua_State *L) {
 
 static int ldbus_message_iter_init(lua_State *L) {
 	DBusMessage *message = check_DBusMessage(L, 1);
-	DBusMessageIter *iter;
+	lDBusMessageIter *iter;
 	if (lua_gettop(L) == 1) {
 		push_DBusMessageIter(L);
+		iter = lua_touserdata(L, 2);
 	} else {
 		lua_settop(L, 2);
+		iter = luaL_checkudata(L, 2, DBUS_MESSAGE_ITER_METATABLE);
+		unref_ldbus_message_iter(iter);
 	}
-	iter = luaL_checkudata(L, 2, DBUS_MESSAGE_ITER_METATABLE);
 
-	if (!dbus_message_iter_init(message, iter)) {
+	if (!dbus_message_iter_init(message, &iter->iter)) {
 		lua_pushnil(L);
+		iter->message = NULL;
+	} else {
+		iter->message = message;
+		dbus_message_ref(message);
 	}
 
 	return 1;
@@ -151,15 +157,20 @@ static int ldbus_message_iter_init(lua_State *L) {
 
 static int ldbus_message_iter_init_append(lua_State *L) {
 	DBusMessage *message = check_DBusMessage(L, 1);
-	DBusMessageIter *iter;
+	lDBusMessageIter *iter;
 	if (lua_gettop(L) == 1) {
 		push_DBusMessageIter(L);
+		iter = lua_touserdata(L, 2);
 	} else {
 		lua_settop(L, 2);
+		iter = luaL_checkudata(L, 2, DBUS_MESSAGE_ITER_METATABLE);
+		unref_ldbus_message_iter(iter);
 	}
-	iter = luaL_checkudata(L, 2, DBUS_MESSAGE_ITER_METATABLE);
 
-	dbus_message_iter_init_append(message, iter);
+	dbus_message_iter_init_append(message, &iter->iter);
+
+	iter->message = message;
+	dbus_message_ref(iter->message);
 
 	return 1;
 }
