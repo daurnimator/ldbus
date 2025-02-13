@@ -139,7 +139,7 @@ static int ldbus_message_iter_init(lua_State *L) {
 		push_DBusMessageIter(L);
 	} else {
 		lua_settop(L, 2);
-		unref_dbus_message_iter(L);
+		unref_ldbus_message_iter(L, 2);
 	}
 	iter = luaL_checkudata(L, 2, DBUS_MESSAGE_ITER_METATABLE);
 
@@ -160,7 +160,7 @@ static int ldbus_message_iter_init_append(lua_State *L) {
 		push_DBusMessageIter(L);
 	} else {
 		lua_settop(L, 2);
-		unref_dbus_message_iter(L);
+		unref_ldbus_message_iter(L, 2);
 	}
 	iter = luaL_checkudata(L, 2, DBUS_MESSAGE_ITER_METATABLE);
 
