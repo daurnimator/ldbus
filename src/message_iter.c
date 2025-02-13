@@ -66,6 +66,14 @@ static int ldbus_message_iter_get_arg_type(lua_State *L) {
 	return 1;
 }
 
+static int ldbus_message_iter_get_element_count(lua_State *L) {
+	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
+
+	lua_pushinteger(L, dbus_message_iter_get_element_count(iter));
+
+	return 1;
+}
+
 static int ldbus_message_iter_get_element_type(lua_State *L) {
 	DBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
 
@@ -346,17 +354,18 @@ static int ldbus_message_iter_close_container(lua_State *L) {
 
 LDBUS_INTERNAL int push_DBusMessageIter(lua_State *L) {
 	static luaL_Reg const methods [] = {
-		{ "clone",            ldbus_message_iter_clone },
-		{ "has_next",         ldbus_message_iter_has_next },
-		{ "next",             ldbus_message_iter_next },
-		{ "get_arg_type",     ldbus_message_iter_get_arg_type },
-		{ "get_element_type", ldbus_message_iter_get_element_type },
-		{ "recurse",          ldbus_message_iter_recurse },
-		{ "get_signature",    ldbus_message_iter_get_signature },
-		{ "get_basic",        ldbus_message_iter_get_basic },
-		{ "append_basic",     ldbus_message_iter_append_basic },
-		{ "open_container",   ldbus_message_iter_open_container },
-		{ "close_container",  ldbus_message_iter_close_container },
+		{ "clone",		ldbus_message_iter_clone },
+		{ "has_next",		ldbus_message_iter_has_next },
+		{ "next",		ldbus_message_iter_next },
+		{ "get_arg_type",	ldbus_message_iter_get_arg_type },
+		{ "get_element_count",	ldbus_message_iter_get_element_count },
+		{ "get_element_type",	ldbus_message_iter_get_element_type },
+		{ "recurse",		ldbus_message_iter_recurse },
+		{ "get_signature",	ldbus_message_iter_get_signature },
+		{ "get_basic",		ldbus_message_iter_get_basic },
+		{ "append_basic",	ldbus_message_iter_append_basic },
+		{ "open_container",	ldbus_message_iter_open_container },
+		{ "close_container",	ldbus_message_iter_close_container },
 		{ NULL, NULL }
 	};
 
