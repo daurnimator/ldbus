@@ -20,5 +20,5 @@ clean:
 	rm -f -- ldbus.so $(OBJS)
 
 install: ldbus.so
-	mkdir -p $(LUA_LIBDIR)
-	cp ldbus.so $(LUA_LIBDIR)
+	mkdir -p $(DESTDIR)$(LUA_LIBDIR)
+	cp ldbus.so $(DESTDIR)$(LUA_LIBDIR)
