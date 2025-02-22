@@ -2,7 +2,7 @@
 
 ldbus is a C binding to dbus for Lua.
 
-Compatible with Lua 5.1, 5.2 and 5.3 (thanks [compat-5.3](https://github.com/keplerproject/lua-compat-5.3)).
+Compatible with Lua 5.1, 5.2, 5.3 and 5.4 (thanks [compat-5.3](https://github.com/keplerproject/lua-compat-5.3)).
 
 
 # Status
@@ -99,6 +99,7 @@ example.lua is a lua version of [Matthew Johnson's example](https://web.archive.
 [`dbus_message_get_signature()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#gaed63e4c2baaa50d782e8ebb7643def19)                      | `my_message:get_signature()`                                            |
 [`dbus_message_iter_has_next()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#gaaffc75a699c96ff6197287f166df2149)                      | `bool = my_message_iter:has_next()`                                     |
 [`dbus_message_iter_next()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#ga554e9fafd4dcc84cebe9da9344846a82)                          | `bool = my_message_iter:next()`                                         |
+[`dbus_message_iter_get_element_count()`](https://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#gabe60e5d5c3f06f90254eef3e72b5cf49)            | `number = my_message_iter:get_element_count()`                          |
 [`dbus_message_iter_get_element_type()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#ga868a7aeddb9b54b2805776b512f68cb4)              | `type = my_message_iter:get_element_type()`                             | `DBUS_TYPE_INVALID` is returned as `nil`
 [`dbus_message_iter_recurse()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#ga7652e1208743da5dd4ecc5aef07bf207)                       | `sub_iter = my_message_iter:recurse([sub_iter])`                        | Creates a new `DBusMessageIter` if one is not passed
 [`dbus_message_iter_get_signature()`](http://dbus.freedesktop.org/doc/api/html/group__DBusMessage.html#gab4579a88a1a7eaf648350466f585ef8b)                 | `sig = my_message_iter:get_signature()`                                 |
