@@ -146,10 +146,11 @@ static int ldbus_message_iter_init(lua_State *L) {
 
 	if (!dbus_message_iter_init(message, &iter->iter)) {
 		lua_pushnil(L);
+		iter->message = NULL;
+	} else {
+		iter->message = message;
+		dbus_message_ref(message);
 	}
-
-	iter->message = message;
-	dbus_message_ref(message);
 
 	return 1;
 }

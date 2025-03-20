@@ -324,6 +324,7 @@ static int ldbus_message_iter_open_container(lua_State *L) {
 	}
 
 	if (!dbus_message_iter_open_container(&iter->iter, argtype, contained_signature, &sub->iter)) {
+		sub->message = NULL;
 		return luaL_error(L, LDBUS_NO_MEMORY);
 	}
 
