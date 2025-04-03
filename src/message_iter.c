@@ -343,23 +343,20 @@ static int ldbus_message_iter_close_container(lua_State *L) {
 	return 1;
 }
 
-static int ldbus_message_iter_gc(lua_State *L)
-{
-	lDBusMessageIter *iter = luaL_checkudata(L, -1, DBUS_MESSAGE_ITER_METATABLE);
-
-	if (iter->message) {
-		dbus_message_unref(iter->message);
-		iter->message = NULL;
-	}
-
-	return 0;
-}
-
 LDBUS_INTERNAL void unref_ldbus_message_iter(lDBusMessageIter *iter) {
 	if (iter->message) {
 		dbus_message_unref(iter->message);
 		iter->message = NULL;
 	}
+}
+
+static int ldbus_message_iter_gc(lua_State *L)
+{
+	lDBusMessageIter *iter = luaL_checkudata(L, 1, DBUS_MESSAGE_ITER_METATABLE);
+
+	unref_ldbus_message_iter(iter);
+
+	return 0;
 }
 
 LDBUS_INTERNAL int push_DBusMessageIter(lua_State *L) {
