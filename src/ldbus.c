@@ -14,7 +14,7 @@
 
 int tostring(lua_State *L) {
 	if (!luaL_getmetafield(L, 1, "__udtype")) {
-		lua_pushstring(L, "object with a generic __tostring metamethod but no __type metafield");
+		lua_pushstring(L, "object with a generic __tostring metamethod but no __udtype metafield");
 	}
 	lua_pushfstring(L, "%s: %p", lua_tostring(L, -1), lua_topointer(L, -2));
 	return 1;
